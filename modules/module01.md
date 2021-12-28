@@ -26,9 +26,9 @@ In this module, you will learn about Azure DevOps platform.
 
 | #  | Section | Role |
 | --- | --- | --- |
-| 1 | [Getting Started with Azure DevOps](#1-signup-for-an-azure-devops-account) | Azure Administrator |
+| 1 | [Signup for an azure devops account](#1-signup-for-an-azure-devops-account) | Azure Administrator |
 | 2 | [Create organization or project collection](#2-create-organization-or-project-collection) | Azure Administrator |
-| 3 | [Manage your project](#3-Manage-your-project) | Azure Administrator |
+| 3 | [Manage your project](#3-manage-your-project) | Azure Administrator |
 | 4 | [Repositories and Branches](#4-Repositories-and-Branches) | Azure Administrator |
 | 5 | [Release Flow](#5-Release-Flow) | Azure Administrator |
 | 6 | [Introduction to Azure Pipelines](#6-Introduction-to-Azure-Pipelines) | Azure Administrator |
@@ -75,9 +75,47 @@ All organizations must be manually created via the web portal. We don't support 
 
 ----------------------------------------------------------------
 
-All organizations must be manually created via the web portal. We don't support automated creation of organizations. We do support automated organization configuration, project creation, and resource provisioning via REST API.
+1. Sign in to [Azure DevOps](https://go.microsoft.com/fwlink/?LinkId=307137).
+
+2. Select New organization.
+
+![image](https://user-images.githubusercontent.com/19226157/147613677-e1b940b5-45d0-4dfb-af31-6bdd1e995c1f.png)
+
+3. Confirm information, and then select Continue.
+
+![image](https://user-images.githubusercontent.com/19226157/147613688-4038f757-59ad-4ec0-bede-57e5299a479e.png)
+
+![image](https://user-images.githubusercontent.com/19226157/147613700-40fa96a8-dc90-49b0-80d3-79cb3c18e79f.png)
+
+
+Congratulations, you're now an organization owner!
+
+Sign in to your organization at any time, https://dev.azure.com/{yourorganization}.
+
+## 📚 Additional Reading
+
+Read and understand [how to Plan your organizational structure](https://docs.microsoft.com/en-us/azure/devops/user-guide/plan-your-azure-devops-org-structure?view=azure-devops).
+
 
 ## 3. Manage your project
+
+### 3a. Create a project
+
+If you signed up for Azure DevOps with a newly created Microsoft account (MSA), your project is automatically created and named based on your sign-in.
+
+If you signed up for Azure DevOps with an existing MSA or GitHub identity, you're automatically prompted to create a project. You can create either a public or private project. To learn more about public projects, see What is a public project?.
+
+1. Enter information into the form provided, which includes a project name, description, visibility selection, initial source control type, and work item process
+
+![image](https://user-images.githubusercontent.com/19226157/147613942-8cf0e8f3-5fee-49ab-be19-5696adbd93f2.png)
+
+See choosing the right version control for your project and choose a process for guidance.
+
+2. When your project is complete, the welcome page appears.
+
+![image](https://user-images.githubusercontent.com/19226157/147613999-0c03fd86-1546-4c7d-a386-b7650f0efd4e.png)
+
+
 
 ## 4. Repositories and Branches
 
