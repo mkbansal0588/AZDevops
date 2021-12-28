@@ -115,6 +115,27 @@ See choosing the right version control for your project and choose a process for
 
 ![image](https://user-images.githubusercontent.com/19226157/147613999-0c03fd86-1546-4c7d-a386-b7650f0efd4e.png)
 
+### 3b. Invite team members
+
+Give team members access to your organization by adding their email addresses or GitHub usernames to your organization. For GitHub user invitations, ensure you've enabled the policy, Invite GitHub users in Organization settings > Policies tab.
+
+1. Sign in to your organization (https://dev.azure.com/{yourorganization}).
+
+2. Select Organization settings.
+
+![image](https://user-images.githubusercontent.com/19226157/147614278-d41a82c2-61c1-4b91-b9d0-a2df5bdc5a3a.png)
+
+3. Select Users > Add new users.
+
+![image](https://user-images.githubusercontent.com/19226157/147614293-bac8b0a3-0027-4f7f-9b02-dec23285fdd3.png)
+
+4. Enter the following information:
+
+   - Users: Enter the email addresses (Microsoft accounts) or GitHub usernames for the users. You can add several email addresses by separating them with a semicolon (;). An email address appears in red when it's accepted.
+   - Access level: Leave the access level as Basic for users who will contribute to the code base. To learn more, see About [access levels](https://docs.microsoft.com/en-us/azure/devops/organizations/security/access-levels?view=azure-devops).
+   - Add to project: Select the project you want to add them to.
+   - DevOps Groups: Leave as Project Contributors, the default security group for users who will contribute to your project. To learn more, see [Default permissions and access assignments](https://docs.microsoft.com/en-us/azure/devops/organizations/security/permissions-access?view=azure-devops).
+
 
 
 ## 4. Repositories and Branches
