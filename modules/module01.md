@@ -1,6 +1,6 @@
-# Module 01 - Sign Up for Azure DevOps Free Account
+# Module 01 - Azure DevOps
 
-[< Previous Module](../modules/module00.md) - **[Home](../README.md)** - [Next Module >](../modules/module02a.md)
+[< Previous Module](../modules/module00.md) - **[Home](../README.md)** - [Next Module >](../modules/module02.md)
 
 ## :thinking: Prerequisites
 
@@ -10,17 +10,29 @@
 
 ## :loudspeaker: Introduction
 
-To create and use the Azure DevOps platform, you will need to sign up for an Azure DevOps account.
+In this module, you will learn about Azure DevOps platform.
 
 ## :dart: Objectives
 
-* Signup an Azure DevOps account.
+* Signup for an Azure DevOps account.
+* Create Organization or project collection.
+* Manage your project.
+* Repositories and Branches
+* Release Flow
+* Introduction to Azure Pipelines
+* Agent Pools
 
 ##  :bookmark_tabs: Table of Contents
 
 | #  | Section | Role |
 | --- | --- | --- |
 | 1 | [Getting Started with Azure DevOps](#1-signup-for-an-azure-devops-account) | Azure Administrator |
+| 2 | [Create organization or project collection](#2-create-organization-or-project-collection) | Azure Administrator |
+| 3 | [Manage your project](#3-Manage-your-project) | Azure Administrator |
+| 4 | [Repositories and Branches](#4-Repositories-and-Branches) | Azure Administrator |
+| 5 | [Release Flow](#5-Release-Flow) | Azure Administrator |
+| 6 | [Introduction to Azure Pipelines](#6-Introduction-to-Azure-Pipelines) | Azure Administrator |
+| 7 | [Agent Pools](#7-Agent-Pools) | Azure Administrator |
 
 <div align="right"><a href="#module-01---create-an-azure-purview-account">↥ back to top</a></div>
 
@@ -52,6 +64,28 @@ You can rename and delete your organization, or change the organization location
 
 If you signed in with an existing Microsoft account, your next step is to Create a project. If you signed in with a newly created Microsoft account, then your project is automatically created and named after your account name. To learn more about managing projects, see Manage projects.
 
+## 2. Create organization or project collection
+
+Learn how to create an organization. An organization is used to connect groups of related projects, helping to scale up an enterprise. You can use a personal Microsoft account, GitHub account, or a work or school account. Use your work or school account to automatically connect your organization to your Azure Active Directory (Azure AD).
+
+----------------------- ------------------------------------
+## ❗ Note 
+
+All organizations must be manually created via the web portal. We don't support automated creation of organizations. We do support automated organization configuration, project creation, and resource provisioning via REST API.
+
+----------------------------------------------------------------
+
+All organizations must be manually created via the web portal. We don't support automated creation of organizations. We do support automated organization configuration, project creation, and resource provisioning via REST API.
+
+## 3. Manage your project
+
+## 4. Repositories and Branches
+
+## 5. Release Flow
+
+## 6. Introduction to Azure Pipelines
+
+## 7. Agent Pools
 
 ## :tada: Summary
 
