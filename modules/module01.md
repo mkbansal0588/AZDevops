@@ -29,7 +29,7 @@ In this module, you will learn about Azure DevOps platform.
 | 1 | [Signup for an azure devops account](#1-signup-for-an-azure-devops-account) | Azure Administrator |
 | 2 | [Create organization or project collection](#2-create-organization-or-project-collection) | Azure Administrator |
 | 3 | [Manage your project](#3-manage-your-project) | Azure Administrator |
-| 4 | [Repositories and Branches](#4-Repositories-and-Branches) | Azure Administrator |
+| 4 | [Azure Repos](#4-azure-repos) | Azure Administrator |
 | 5 | [Release Flow](#5-Release-Flow) | Azure Administrator |
 | 6 | [Introduction to Azure Pipelines](#6-Introduction-to-Azure-Pipelines) | Azure Administrator |
 | 7 | [Agent Pools](#7-Agent-Pools) | Azure Administrator |
@@ -138,7 +138,22 @@ Give team members access to your organization by adding their email addresses or
 
 
 
-## 4. Repositories and Branches
+## 4. Azure Repos
+
+Azure Repos is a set of version control tools that you can use to manage your code.
+
+Version control systems are software that help you track changes you make in your code over time. As you edit your code, you tell the version control system to take a snapshot of your files. The version control system saves that snapshot permanently so you can recall it later if you need it. Use version control to save your work and coordinate code changes across your team.
+
+Azure Repos provides two types of version control:
+
+- Git: distributed version control
+- Team Foundation Version Control (TFVC): centralized version control
+
+We'll use git throughout this bootcamp session.
+
+### 4a. Create a new azure repo
+
+
 
 ## 5. Release Flow
 
