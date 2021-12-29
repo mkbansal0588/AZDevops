@@ -1,6 +1,6 @@
 # Module 02 - Azure DevOps Platform - Azure Pipelines
 
-[< Previous Module](../modules/module01.md) - **[Home](../README.md)** - [Next Module >](../modules/module02.md)
+[< Previous Module](../modules/module01.md) - **[Home](../README.md)** - [Next Module >](../modules/module03.md)
 
 ## :thinking: Prerequisites
 * An [Azure account](https://azure.microsoft.com/en-us/free/) with an active subscription.
