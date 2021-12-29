@@ -65,12 +65,6 @@ variable "resource_group_name" {
   default     = ""
 }
 
-variable "extra_tags" {
-  type = map
-  default = {
-      }
-}
-
 variable "enabled_for_disk_encryption" {
   type        = bool
   default     = true
