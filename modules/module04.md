@@ -514,15 +514,169 @@ resource_group_name = "rf-ops-bcmp-de-cacn-001"
 
 ## 4. Deployment pipeline review
 
-Now is the time to put everything that have learnt so far together and create the deployment pipeline.
+Now is the time to put everything that have learnt so far together and create the deployment pipeline. We've defined two files in deployment folder:
 
+- pipeline.yaml: This pipeline calls the both template pipelines (build and deploy) one after another (dependency) and passes the run time argument. 
+
+```
+name: Azure Resource deployment
+
+variables:
+  - template: variables.yaml
+
+parameters:
+  - name: stages
+    displayName: "Various Stage to execute in pipeline."
+    type: object
+    default: 
+      - rg
+      - adls
+      - kv
+      - adf
+  
+  - name: deploymentType
+    displayName: "Type of deployment"
+    type: string
+    default: bulkDeployment
+  
+  - name: bu
+    displayName: "Name of business unit"
+    type: string
+    default: bcmp
+
+  - name: action
+    displayName: "Action to perform. Default value is build. Allowed values of build and destroy"
+    type: string
+    default: build
+    values:
+    - build
+    - destroy
+
+resources:
+ repositories:
+   - repository: cambansal0588             // change it
+     name: cambansal0588/cambansal0588     // change it
+     ref: '$(Build.SourceBranch)'
+     type: git
+     trigger:
+      branches:
+        include:
+          - master
+          - releases/*
+      paths:
+        include:
+          - *
+
+
+stages:
+- ${{ each stage in parameters.stages }}:
+  - ${{ if eq(parameters.action, 'build') }}:
+    - stage: '${{ stage }}_build'
+      jobs:
+      - template: ../template/pipeline.build.yaml
+        parameters:
+          mdname: '${{ stage }}'
+          moduleName: '${{ stage }}'
+          workingDirectory: '$(Agent.BuildDirectory)/repo/tfcode/${{ stage }}'
+          dependsOn: ''
+          condition: ''
+          deploymentFolder: 'deployment'
+          ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+            backendServiceArm: '${{ variables.pp_backendServiceArm }}'
+            backendAzureRmResourceGroupName: '${{ variables.pp_backendAzureRmResourceGroupName }}'
+            backendAzureRmStorageAccountName: '${{ variables.pp_backendAzureRmStorageAccountName }}'
+            backendAzureRmContainerName: '${{ variables.pp_backendAzureRmContainerName }}'
+            backendAzureRmKey: '${{ parameters.deploymentType }}-${{ parameters.bu }}-${{ stage }}-pp.tfstate'
+            keyvault: '${{ variables.pp_keyvault }}'
+            env: '${{ variables.pp_env }}'
+          ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features') }}:
+            backendServiceArm: ${{ variables.de_backendServiceArm }}
+            backendAzureRmResourceGroupName: ${{ variables.de_backendAzureRmResourceGroupName }}
+            backendAzureRmStorageAccountName: ${{ variables.de_backendAzureRmStorageAccountName }}
+            backendAzureRmContainerName: ${{ variables.de_backendAzureRmContainerName }}
+            backendAzureRmKey: ${{ parameters.deploymentType }}-${{ parameters.bu }}-${{ stage }}-de.tfstate
+            keyvault: ${{ variables.de_keyvault }}
+            env: ${{ variables.de_env }}
+          ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases') }}:
+            backendServiceArm: ${{ variables.pr_backendServiceArm }}
+            backendAzureRmResourceGroupName: ${{ variables.pr_backendAzureRmResourceGroupName }}
+            backendAzureRmStorageAccountName: ${{ variables.pr_backendAzureRmStorageAccountName }}
+            backendAzureRmContainerName: ${{ variables.pr_backendAzureRmContainerName }}
+            backendAzureRmKey: '${{ parameters.deploymentType }}-${{ parameters.bu }}-${{ stage }}-pr.tfstate'
+            keyvault: ${{ variables.pr_keyvault }}
+            env: ${{ variables.pr_env }}
+  
+    - stage : ${{ stage }}_deploy
+      dependsOn: ${{ stage }}_build
+      jobs:
+      - template: ../template/pipeline.deploy.yaml
+        parameters:
+          mdname: '${{ stage }}'
+          moduleName: '${{ stage }}'
+          workingDirectory: '$(Agent.BuildDirectory)/repo/tfcode/${{ stage }}'
+          dependsOn: ''
+          condition: ''
+          deploymentFolder: 'deployment'
+          ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+            backendServiceArm: '${{ variables.pp_backendServiceArm }}'
+            backendAzureRmResourceGroupName: '${{ variables.pp_backendAzureRmResourceGroupName }}'
+            backendAzureRmStorageAccountName: '${{ variables.pp_backendAzureRmStorageAccountName }}'
+            backendAzureRmContainerName: '${{ variables.pp_backendAzureRmContainerName }}'
+            backendAzureRmKey: '${{ parameters.deploymentType }}-${{ parameters.bu }}-${{ stage }}-pp.tfstate'
+            keyvault: '${{ variables.pp_keyvault }}'
+            env: '${{ variables.pp_env }}'
+          ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features') }}:
+            backendServiceArm: ${{ variables.de_backendServiceArm }}
+            backendAzureRmResourceGroupName: ${{ variables.de_backendAzureRmResourceGroupName }}
+            backendAzureRmStorageAccountName: ${{ variables.de_backendAzureRmStorageAccountName }}
+            backendAzureRmContainerName: ${{ variables.de_backendAzureRmContainerName }}
+            backendAzureRmKey: ${{ parameters.deploymentType }}-${{ parameters.bu }}-${{ stage }}-de.tfstate
+            keyvault: ${{ variables.de_keyvault }}
+            env: ${{ variables.de_env }}
+          ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases') }}:
+            backendServiceArm: ${{ variables.pr_backendServiceArm }}
+            backendAzureRmResourceGroupName: ${{ variables.pr_backendAzureRmResourceGroupName }}
+            backendAzureRmStorageAccountName: ${{ variables.pr_backendAzureRmStorageAccountName }}
+            backendAzureRmContainerName: ${{ variables.pr_backendAzureRmContainerName }}
+            backendAzureRmKey: '${{ parameters.deploymentType }}-${{ parameters.bu }}-${{ stage }}-pr.tfstate'
+            keyvault: ${{ variables.pr_keyvault }}
+            env: ${{ variables.pr_env }}
+```
+
+Did you notice that this pipeline reads the variables based on the branch used for deployment and then deploys the service to a specific deployment environment?
+
+- variables.yaml: this is the variables file for the pipeline.
+
+```
+variables:
+  de_backendServiceArm: example-app-service-connection
+  de_keyvault: exampleapp12292021
+  de_env: de
+  de_backendAzureRmResourceGroupName: example-app
+  de_backendAzureRmStorageAccountName: exampleapp12292021
+  de_backendAzureRmContainerName: statefiles
+
+  pp_backendServiceArm: example-app-service-connection
+  pp_backendAzureRmResourceGroupName: example-app
+  pp_backendAzureRmStorageAccountName: exampleapp12292021
+  pp_backendAzureRmContainerName: statefiles
+  pp_keyvault: exampleapp12292021
+  pp_env: pp
+
+  pr_backendServiceArm: example-app-service-connection
+  pr_backendAzureRmResourceGroupName: example-app
+  pr_backendAzureRmStorageAccountName: exampleapp12292021
+  pr_backendAzureRmContainerName: statefiles
+  pr_keyvault: exampleapp12292021
+  pr_env: pr
+```
 
 
 ## 📚 Additional Reading
 
 ## 🧑‍💼 To-Do Activities
 
-- Exercise 1: This pipeline generates the terraform plan and then applies in a single step however, in an ideal scenario, we would like to review the plan and wait for explicit approval before this plan is applied. Repurpose this pipeline to implement the desired solution. (Hint - Make use of pipeline environments)
+- Exercise 1: Make changes to pre-production and production terraform module for some/all the modules and deploy two additional sets of resource groups.
 
 ## :tada: Summary
 
