@@ -283,6 +283,32 @@ here is how it should look like after you've added all required secrets to key v
 This mark the completion of Lab setup step 2h.
 
 
+#### 2i - Create a Pipeline execution environment.
+
+Pipeline execution environment is mandatory part of job schema. Pipeline execution environment enable you with additional options to enforce additional checks and approvals during pipeline execution. Follow the steps to create a pipeline execution environment.
+
+- Login to Azure Devops portal.
+
+- Choose the right organization and project if you have multiple organizations and projects.
+
+- Click on Environments, under Pipelines.
+
+![image](https://user-images.githubusercontent.com/19226157/147650272-f4138738-ccb0-4370-b265-68a887204ffa.png)
+
+- Click on New Environment to create one. Give this environment a name and leave all other options default. Click create a new environment.
+
+![image](https://user-images.githubusercontent.com/19226157/147650374-418b0b12-fdb4-4d32-a6ba-d73a5754a6dd.png)
+
+- After this environment is created, you can associate additional checks and approvals with this environment.
+
+![image](https://user-images.githubusercontent.com/19226157/147650450-be619352-60e5-4fe6-a3e3-893cb312d531.png)
+
+- Below screenshot contains, list of few checks that you can associate with an environment.
+
+![image](https://user-images.githubusercontent.com/19226157/147650535-1d1a2e6b-89d9-4b17-8048-3ef94edad260.png)
+
+
+
 
 
 
