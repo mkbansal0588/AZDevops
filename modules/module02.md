@@ -63,81 +63,7 @@ In addition, there are few additionals useful components of Azure pipelines are 
 
 ## 2. Define pipeline using classic web interface
 
-Though this method is deprecated and will not be available in future but it is a good starting point. 
-
-### 2a. Create a service principal
-
-There is no way to directly create a service principal using the Azure portal. When you register an application through the Azure portal, an application object and service principal are automatically created in your home directory or tenant. 
-
-Let's jump straight into creating the identity. If you run into a problem, check the required permissions to make sure your account can create the identity.
-
-- Sign in to your Azure Account through the Azure portal.
-
-- Select Azure Active Directory.
-
-- Select App registrations.
-
-- Select New registration.
-
-- Name the application. Select a supported account type, which determines who can use the application. Under Redirect URI, select Web for the type of application you want to create. Enter the URI where the access token is sent to. You can't create credentials for a Native application. You can't use that type for an automated application. After setting the values, select Register.
-
-![image](https://user-images.githubusercontent.com/19226157/147629724-fcd16d82-883b-4185-8f3e-e7f300a78602.png)
-
-You've created your Azure AD application and service principal.
-
-### 2b. Assign role to service principal on subscription
-
-To access resources in your subscription, you must assign a role to the application. Decide which role offers the right permissions for the application. To learn about the available roles, see Azure built-in roles.
-
-You can set the scope at the level of the subscription, resource group, or resource. Permissions are inherited to lower levels of scope. For example, adding an application to the Reader role for a resource group means it can read the resource group and any resources it contains.
-
-- In the Azure portal, select the level of scope you wish to assign the application to. For example, to assign a role at the subscription scope, search for and select Subscriptions, or select Subscriptions on the Home page.
-
-![image](https://user-images.githubusercontent.com/19226157/147629837-f815c03d-fbc3-44ba-a6b4-efac3a2ce7d5.png)
-
-- Select the particular subscription to assign the application to.
-
-![image](https://user-images.githubusercontent.com/19226157/147629883-a434fcbe-7c07-42c2-bead-85273908ba29.png)
-
-If you don't see the subscription you're looking for, select global subscriptions filter. Make sure the subscription you want is selected for the portal.
-
-- Select Access control (IAM).
-
-- Select Select Add > Add role assignment to open the Add role assignment page.
-
-- Select the Owner role. On next tab which is member tab, Add newly registered application/ service principal as member to the role. Make sure that choosen AD object type is "App". Next click on "Review + Assign" to complete the role assignment.
-
-![image](https://user-images.githubusercontent.com/19226157/147630136-c1c3fa63-532a-453e-967c-92acdf1d6d0d.png)
-
-
-### 2c. Create a service connection
-
-Complete the following steps to create a service connection for Azure Pipelines.
-
-- Sign in to your organization (https://dev.azure.com/{yourorganization}) and select your project.
-
-- Select Project settings > Service connections.
-
-![image](https://user-images.githubusercontent.com/19226157/147630261-5d5b04f0-68a1-4461-8d7f-178083fb4fbd.png)
-
-- Select + New service connection, select the type of service connection as "Azure Resource Manager", and then select Next.
-
-![image](https://user-images.githubusercontent.com/19226157/147630324-7dc509c7-2320-4d85-8229-21e97296c4f8.png)
-
-- Choose recommended authentication method, i.e. Service principal (Automatic), and then select Next.
-
-![image](https://user-images.githubusercontent.com/19226157/147630352-047f6825-9483-4ca0-be64-5c2e3a23a942.png)
-
-- Give this connection a meaningful name and leave rest of things default.Select Save to create the connection.
-
-![image](https://user-images.githubusercontent.com/19226157/147630453-85a4c9a1-2f1f-479f-a754-96769b51e76b.png)
-
-While trying to save it, it might ask you to authenticate yourself with Azure portal. if so, do the needful and after the succesful authentication, you should be able to see a service connection on devops portal.
-
-![image](https://user-images.githubusercontent.com/19226157/147630632-cdffb6a9-c511-4605-8995-02052cadab62.png)
-
-
-### 2d. Create Pipeline using Classic web interface 
+Though this method is deprecated and will be removed in future but it is a good starting point. 
 
 Before we get our hands dirty, let's understand the pipeline objective. 
 Pipeline will be used to execute the terraform code (we'll learn about it in next module) that inturn deploy azure services. We are also going to follow couple of best practices - Build generic templates for pipeline execution and use your own scripts wherever possible instead of pre-built tasks. So basically, we are going to build the generic template for terraform code execution which will be used by subsequent deployment pipelines for actual azure service deployment.
@@ -178,14 +104,9 @@ Now since, we have the clarity of objective of this exercise, let get on with it
   
   - Bash script to apply the terraform plan (terraform apply)
 
-- Click on plus icon and search for "key vault" in Add tasks pane. Click on "Azure Key Vault (Description - Download Azure Key Vault Secrets)" . This task now should be added to the queue. Click on the task to configure it. Give this task a meaningful name, choose the service connection that was created in Step 2c , enter test in keyvault name section and leave rest of the configuration parameters as default.
+- Click on plus icon and search for "key vault" in Add tasks pane. Click on "Azure Key Vault (Description - Download Azure Key Vault Secrets)" . This task now should be added to the queue. Click on the task to configure it. Give this task a meaningful name, choose the service connection and keyvault from drop down list. Leave rest of the configuration parameters as default. This task will download the secrets from key vaults and set them up as variables to be used in subsequent steps in pipeline.
 
------------------------ ------------------------------------
-## ❗ Note 
-
-Since, we currently don't have any key vault created, you don't have the option to choose from drop down list. 
-
-----------------------------------------------------------------
+![image](https://user-images.githubusercontent.com/19226157/147636663-f3c737f0-dd5d-48bf-8fcf-ff4d925df2d3.png)
 
 - Click on plus icon to add another task. This time around, search for terraform and choose first one that pops up in the search. This task most likely show up in marketplace however, it is available to use for free so click on "Get It free" and follow the instructions to install it in your devops organization.
 
@@ -200,18 +121,93 @@ There is no need to configure this task. This task will automatically fetch the 
 - Next add a new task and search for "Bash" and click on Add Task. Click on the task to configure it. Click on script type as "Inline" and type the following block of code in script section. 
 
 ```
-terraform -chdir="${{ parameters.workingDirectory }}" init \
-                -plugin-dir="../faa-tf-common-files/plugins" \
+terraform init \
                 -reconfigure \
-                -backend-config="storage_account_name=${{ parameters.backendAzureRmStorageAccountName }}" \
-                -backend-config="container_name=${{ parameters.backendAzureRmContainerName }}" \
-                -backend-config="key=${{ parameters.backendAzureRmKey }}" \
-                -backend-config="resource_group_name=${{ parameters.backendAzureRmResourceGroupName }}" \
+                -backend-config="storage_account_name=$(storage_account_name)" \
+                -backend-config="container_name=$(container_name)" \
+                -backend-config="key=$(key)" \
+                -backend-config="resource_group_name=$(resource_group_name)" \
                 -backend-config="subscription_id=$(subscriptionid)" \
                 -backend-config="tenant_id=$(tenantid)" \
                 -backend-config="client_id=$(clientid)" \
                 -backend-config="client_secret=$(clientsecret)"
  ```
+
+Change the display name to "Terraform init"
+
+![image](https://user-images.githubusercontent.com/19226157/147640615-69f176f3-e768-4f4e-a3af-1ed4ed26c8cb.png)
+
+In advanced section of pipeline task, set up the working directory to rg sub-folder in tfcode folder in repository.
+
+![image](https://user-images.githubusercontent.com/19226157/147640631-63486c27-7ab6-4e5b-abbd-31bdd1e5c412.png
+
+This piece of code, make use of variables. Some of these variables - storage_account_name, container_name, key, & resource_group_name, needs to be defined explicitly while others - subscriptionid, tenantid, clientid, clientsecret, references to key secrets that will be downloaded at the beginning of pipeline execution.
+
+- Set up variables for pipeline to use.
+  - storage_account_name: Name of the storage account created in Lab setup step 2e.
+  - container_name: Name of the container created in Lab setup step 2e.
+  - key: Name to be given to terraform state of the resource being deployed. For example - resourceGroup.tfstate
+  - resource_group_name: Name of the resource group containing the storage account created in Lab setup step 2e.
+
+![image](https://user-images.githubusercontent.com/19226157/147640428-03110510-e1df-4885-9770-40564706b011.png)
+
+- Next, add another task of Bash script type. Add the following piece of code in inline script.
+
+```
+az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+export ARM_CLIENT_ID=$(clientid)
+export ARM_CLIENT_SECRET=$(clientsecret)
+export ARM_TENANT_ID=$(tenantid)
+export AZURE_CLIENT_ID=$(clientid)
+export AZURE_CLIENT_SECRET=$(clientsecret)
+export AZURE_TENANT_ID=$(tenantid)
+export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+terraform plan -out $(Build.BuildId).plan
+
+```
+Change the display name to "Terraform plan"
+
+In advanced section of pipeline task, set up the working directory to rg sub-folder in tfcode folder in repository.
+
+![image](https://user-images.githubusercontent.com/19226157/147641031-88324342-940b-43fb-8fbb-38d795473c71.png)
+
+- Add another task again of bash script type and add the following piece of code in inline script.
+
+```
+az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+export ARM_CLIENT_ID=$(clientid)
+export ARM_CLIENT_SECRET=$(clientsecret)
+export ARM_TENANT_ID=$(tenantid)
+export AZURE_CLIENT_ID=$(clientid)
+export AZURE_CLIENT_SECRET=$(clientsecret)
+export AZURE_TENANT_ID=$(tenantid)
+export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+terraform apply -auto-approve $(Build.BuildId).plan
+
+```
+Change the display name to "Terraform apply"
+
+In advanced section of pipeline task, set up the working directory to rg sub-folder in tfcode folder in repository.
+
+- Last task is to destroy the resource group, again of bash script type.
+
+```
+az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+export ARM_CLIENT_ID=$(clientid)
+export ARM_CLIENT_SECRET=$(clientsecret)
+export ARM_TENANT_ID=$(tenantid)
+export AZURE_CLIENT_ID=$(clientid)
+export AZURE_CLIENT_SECRET=$(clientsecret)
+export AZURE_TENANT_ID=$(tenantid)
+export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+terraform destroy
+```
+
+Change the display name to "Terraform destroy"
+
+In advanced section of pipeline task, set up the working directory to rg sub-folder in tfcode folder in repository.
+
+
 
 
 
