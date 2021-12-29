@@ -200,12 +200,32 @@ export AZURE_CLIENT_ID=$(clientid)
 export AZURE_CLIENT_SECRET=$(clientsecret)
 export AZURE_TENANT_ID=$(tenantid)
 export ARM_SUBSCRIPTION_ID=$(subscriptionid)
-terraform destroy
+terraform apply -auto-approve -destroy
 ```
 
 Change the display name to "Terraform destroy"
 
 In advanced section of pipeline task, set up the working directory to rg sub-folder in tfcode folder in repository.
+
+- In the last step, click on pipeline tab and add the artifacts for the pipeline. Choose Azure DevOps Repository as artifact and provide repository name and branch name.
+
+![image](https://user-images.githubusercontent.com/19226157/147643159-eff18ef3-e43a-4951-8099-a6b88ce3261b.png)
+
+- Now the pipeline is completed and ready to be deployed. Click on create release to deploy the pipeline. Add the release description and click on create to create the release.
+  
+![image](https://user-images.githubusercontent.com/19226157/147643264-033ed68f-c1ca-45cb-829e-29b8da1d6eb2.png)
+
+After the release is created, page will present you with hyperlink to release. Click on the link to monitor the job execution.
+
+![image](https://user-images.githubusercontent.com/19226157/147643377-3b779998-0afd-4f0c-bb6d-ce5ea1818f89.png)
+
+Click on stages and then view logs to monitor the execution logs.
+
+![image](https://user-images.githubusercontent.com/19226157/147643438-9fb2516f-575d-44cd-875f-75755c4f53b4.png)
+
+Congratulations! you have successfully created your first pipeline.
+
+## 3. Define pipeline using yaml syntax
 
 
 
