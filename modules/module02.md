@@ -1,4 +1,4 @@
-# Module 02 - Create an Organization or project collection
+# Module 02 - Azure DevOps Platform - Azure Pipelines
 
 [< Previous Module](../modules/module01.md) - **[Home](../README.md)** - [Next Module >](../modules/module02.md)
 
