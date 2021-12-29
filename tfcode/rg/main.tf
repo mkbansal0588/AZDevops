@@ -29,7 +29,7 @@ resource "azurerm_management_lock" "rg" {
   name       = "DenyDelete"
   scope      = azurerm_resource_group.rg["${count.index}"].id   
   lock_level = "CanNotDelete"
-  notes      = "L’ajout d’une ressource lock avec l’action delete"
+  notes      = "DenyDelete"
   depends_on = [
     azurerm_resource_group.rg
   ]
