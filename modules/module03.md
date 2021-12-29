@@ -70,7 +70,7 @@ To tell Azure CLI and Terraform which Tenant and Subscription this will run agai
 az account set --subscription {GUID}
 
  
-## 3. Terraform Providers
+## 3. Terraform Provider
 Providers are simple to understand if you start with this thought, they are the gateway in which Terraform talks to a service to create infrastructure. For example, the azurerm provider allows Terraform to create infrastructure within Azure. The provider provides general settings and a library for creating Terraform scripts.
 
 https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
