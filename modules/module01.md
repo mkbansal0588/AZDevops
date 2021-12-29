@@ -1,6 +1,6 @@
 # Module 01 - Azure DevOps
 
-[< Previous Module](../modules/module00.md) - **[Home](../README.md)** - [Next Module >](../modules/module02.md)
+**[Home](../README.md)** - [Next Module >](../modules/module02.md)
 
 ## :thinking: Prerequisites
 
@@ -31,8 +31,6 @@ In this module, you will learn about Azure DevOps platform.
 | 3 | [Manage your project](#3-manage-your-project) | Azure Administrator |
 | 4 | [Azure Repos](#4-azure-repos) | Azure Administrator |
 | 5 | [Release Flow](#5-Release-Flow) | Azure Administrator |
-| 6 | [Introduction to Azure Pipelines](#6-Introduction-to-Azure-Pipelines) | Azure Administrator |
-| 7 | [Agent Pools](#7-Agent-Pools) | Azure Administrator |
 
 <div align="right"><a href="#module-01---create-an-azure-purview-account">↥ back to top</a></div>
 
@@ -241,18 +239,11 @@ The pipeline also has to be a “branching strategy” aware. It should detect t
 - Release branch: Builds the code, releases it to the acceptance and after approval to production environments
 - Pull request: Continuous Delivery is not needed, therefore the code building happens
 
-
-## 6. Introduction to Azure Pipelines
-
-
-
-## 7. Agent Pools
-
 ## 🧑‍💼 To-Do Activities
 
 - Exercise 1: Rename the repository and give it a meaningful name.
 - Exercise 2: Since main/master branch is single source of truth, secure the branch. ( Hint - Read about security policies )
-- Exercise 3: Tried making modification to readme file in main/master branch. Please try it prior to and after the exercise 3.
+- Exercise 3: Try making modification to readme file in main/master branch. Try it prior to and after the exercise # 2.
 - Exercise 4: Create a feature/topic branch, make some modifications and tried merging the changes to main/master branching using a pull request.
 
 ## :tada: Summary
