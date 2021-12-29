@@ -496,6 +496,10 @@ Congratulations, you have created your first yaml pipeline.
 
 ## 📚 Additional Reading
 
+## 🧑‍💼 To-Do Activities
+
+- Exercise 1: This pipeline generates the terraform plan and then applies in a single step however, in an ideal scenario, we would like to review the plan and wait for explicit approval before this plan is applied. Repurpose this pipeline to implement the desired solution. (Hint - Make use of pipeline environments)
+
 ## :tada: Summary
 
 This module provided an overview of how to create a legacy and yaml based Azure devops pipelines..
