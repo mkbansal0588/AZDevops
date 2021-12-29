@@ -26,7 +26,7 @@ In this module, you will learn about deploying terraform deployment at scale.
 | --- | --- | --- |
 | 1 | [Terraform Code Review for Data Factory](#1-terraform-code-review-for-data-factory) | Azure Administrator |
 | 2 | [Terraform deployment template pipeline review](#2-terraform-deployment-template-pipeline-review) | Azure Administrator |
-| 3 | [Deployment variables files review](#3-deployment-variables-files-review) | Azure Administrator |
+| 3 | [Terraform deployment variables files review](#3-terraform-deployment-variables-files-review) | Azure Administrator |
 | 4 | [Deployment pipeline review](#4-deployment-pipeline-review) | Azure Administrator |
 
 ## 1. Terraform Code Review for Data Factory
@@ -233,7 +233,288 @@ output "data_factory_id" {
 
 ## 2. Terraform deployment template pipeline review
 
+Though we can complete the deployment in one pipeline however, I have broken the deployment down into two different pipelines. First pipeline a.k.a build pipeline generates the plan and wait for explicit approvals from approvers before second pipeline a.k.a deployment pipeline deploy the azure services.
 
+- Build Pipeline: This pipeline consists of following steps
+  1. Download repository to local filesystem.
+  2. Download secrets from key vault.
+  3. Install terraform binaries.
+  4. Terraform initialization (init).
+  5. Terraform deploy plan generation (plan).
+
+```
+parameters:
+  - name: moduleName
+    displayName: "Module Name to Build"
+    type: string
+    default: ""
+  - name: workingDirectory
+    displayName: "Working DIrectory"
+    type: string
+    default: ""
+  - name: backendServiceArm
+    displayName: "Service Connection to use for backend."
+    type: string
+    default: ""
+  - name: backendAzureRmResourceGroupName
+    displayName: "Resource Group for Backend storage account"
+    type: string
+    default: ""
+  - name: backendAzureRmStorageAccountName
+    displayName: "Backend storage account"
+    type: string
+    default: ""
+  - name: backendAzureRmContainerName
+    displayName: "Container name to store terraform state file"
+    type: string
+    default: ""
+  - name: backendAzureRmKey
+    displayName: "State File Name"
+    type: string
+    default: ""
+  - name: keyvault
+    displayName: "Name of keyvault to pull the secrets and client id to be used for making connection to Azure for backend storage"
+    type: string
+    default: ""
+  - name: dependsOn
+    displayName: "Define Dependency"
+    type: string
+    default: ""
+  - name: condition
+    displayName: "Condition to run a job"
+    type: string
+    default: ""
+  - name: env
+    displayName: "Environment up for deployment"
+    type: string
+    default: ""
+  - name: deploymentFolder
+    displayName: "Repository to use to trigger the deployment."
+    type: string
+    default: ""
+  - name: secrets
+    displayName: "secrets to download"
+    type: string
+    default: "tenantid,subscriptionid,clientsecret,clientid"
+  - name: mdname
+    displayName: "Name of the module"
+    type: string
+
+jobs:
+  - deployment: 
+    displayName: 'Building Module ${{ parameters.mdname }}'
+    pool:
+      name: 'Azure Pipelines'
+    dependsOn: '${{ parameters.dependsOn }}'
+    condition: '${{ parameters.condition }}'
+    environment: build
+    workspace:
+      clean: all
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+            path: repo
+            
+          - task: AzureKeyVault@1
+            inputs:
+              azureSubscription: '${{ parameters.backendServiceArm }}'
+              KeyVaultName: '${{ parameters.keyvault }}'
+              SecretsFilter: '${{ parameters.secrets }}'
+              runAsPreJob: true
+            displayName: 'Get key vault secrets as pipeline variables'
+
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+            displayName: 'Install Terraform latest'
+            
+          - script: |
+              terraform -chdir="${{ parameters.workingDirectory }}" init \
+                -reconfigure \
+                -backend-config="storage_account_name=${{ parameters.backendAzureRmStorageAccountName }}" \
+                -backend-config="container_name=${{ parameters.backendAzureRmContainerName }}" \
+                -backend-config="key=${{ parameters.backendAzureRmKey }}" \
+                -backend-config="resource_group_name=${{ parameters.backendAzureRmResourceGroupName }}" \
+                -backend-config="subscription_id=$(subscriptionid)" \
+                -backend-config="tenant_id=$(tenantid)" \
+                -backend-config="client_id=$(clientid)" \
+                -backend-config="client_secret=$(clientsecret)"
+            displayName: Terraform Init
+
+          - script: |
+              az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+              export ARM_CLIENT_ID=$(clientid)
+              export ARM_CLIENT_SECRET=$(clientsecret)
+              export ARM_TENANT_ID=$(tenantid)
+              export AZURE_CLIENT_ID=$(clientid)
+              export AZURE_CLIENT_SECRET=$(clientsecret)
+              export AZURE_TENANT_ID=$(tenantid)
+              export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+              terraform -chdir="${{ parameters.workingDirectory }}" plan -var-file="$(Agent.BuildDirectory)/repo/tfcode/${{ parameters.deploymentFolder }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+            displayName: Terraform Plan
+```
+
+Since this is a template, I have parameterized the variables used in the script inside the pipeline template.
+
+- Deployment Pipeline: This pipeline actually deploys the pipeline. It consists of all the steps of build pipeline and an additional step on terraform deployment a.k.a apply.
+
+```
+parameters:
+- name: moduleName
+  displayName: "Module Name to deploy"
+  type: string
+  default: ""
+- name: workingDirectory
+  displayName: "Working DIrectory"
+  type: string
+  default: ""
+- name: dependsOn
+  displayName: "Define job Dependency"
+  type: string
+  default: ""
+- name: condition
+  displayName: "Condition to run a job"
+  type: string
+  default: ""
+- name: backendServiceArm
+  displayName: "Service connection for backend service"
+  type: string
+  default: ""
+- name: backendAzureRmResourceGroupName
+  displayName: "Resource Group for Backend storage account"
+  type: string
+  default: ""
+- name: backendAzureRmStorageAccountName
+  displayName: "Backend storage account"
+  type: string
+  default: ""
+- name: backendAzureRmContainerName
+  displayName: "Container name to store terraform state file"
+  type: string
+  default: ""
+- name: backendAzureRmKey
+  displayName: "State File Name"
+  type: string
+  default: ""
+- name: keyvault
+  displayName: "Name of keyvault to pull the secrets and client id to be used for making connection to Azure for backend storage"
+  type: string
+  default: ""
+- name: env
+  displayName: "Environment up for deployment"
+  type: string
+  default: ""
+- name: deploymentFolder
+  displayName: "Repository to use to trigger the deployment."
+  type: string
+  default: ""
+- name: secrets
+  displayName: "secrets to download"
+  type: string
+  default: "tenantid,subscriptionid,clientsecret,clientid"
+- name: mdname
+  displayName: "Name of the module"
+  type: string
+
+jobs:
+  - deployment: 
+    displayName: 'Deploy Module ${{ parameters.mdname }}'
+    pool:
+      name: 'Azure Pipelines'
+    dependsOn: '${{ parameters.dependsOn }}'
+    condition: '${{ parameters.condition }}'
+    environment: deploy
+    workspace:
+      clean: all
+    strategy:
+      runOnce:
+        deploy:
+          steps:  
+          - checkout: self
+            path: repo
+
+          - task: AzureKeyVault@1
+            inputs:
+              azureSubscription: '${{ parameters.backendServiceArm }}'
+              KeyVaultName: '${{ parameters.keyvault }}'
+              SecretsFilter: '${{ parameters.secrets }}'
+              runAsPreJob: true
+            displayName: 'Get key vault secrets as pipeline variables'
+
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+            displayName: 'Install Terraform latest'
+
+          - script: |
+              terraform -chdir="${{ parameters.workingDirectory }}" init \
+                -reconfigure \
+                -backend-config="storage_account_name=${{ parameters.backendAzureRmStorageAccountName }}" \
+                -backend-config="container_name=${{ parameters.backendAzureRmContainerName }}" \
+                -backend-config="key=${{ parameters.backendAzureRmKey }}" \
+                -backend-config="resource_group_name=${{ parameters.backendAzureRmResourceGroupName }}" \
+                -backend-config="subscription_id=$(subscriptionid)" \
+                -backend-config="tenant_id=$(tenantid)" \
+                -backend-config="client_id=$(clientid)" \
+                -backend-config="client_secret=$(clientsecret)"
+            displayName: Terraform Init
+
+          - script: |
+              az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+              export ARM_CLIENT_ID=$(clientid)
+              export ARM_CLIENT_SECRET=$(clientsecret)
+              export ARM_TENANT_ID=$(tenantid)
+              export AZURE_CLIENT_ID=$(clientid)
+              export AZURE_CLIENT_SECRET=$(clientsecret)
+              export AZURE_TENANT_ID=$(tenantid)
+              export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+              terraform -chdir="${{ parameters.workingDirectory }}" plan -var-file="$(Agent.BuildDirectory)/repo/tfcode/${{ parameters.deploymentFolder }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan      
+            displayName: Terraform Plan
+
+          - script: |
+              az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+              export ARM_CLIENT_ID=$(clientid)
+              export ARM_CLIENT_SECRET=$(clientsecret)
+              export ARM_TENANT_ID=$(tenantid)
+              export AZURE_CLIENT_ID=$(clientid)
+              export AZURE_CLIENT_SECRET=$(clientsecret)
+              export AZURE_TENANT_ID=$(tenantid)
+              export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+              terraform -chdir="${{ parameters.workingDirectory }}" apply -auto-approve -var-file="$(Agent.BuildDirectory)/repo/tfcode/${{ parameters.deploymentFolder }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+            displayName: Terraform Apply
+```
+
+Now, we are familiar with deployment template. Let's put this template into action.
+
+## 3. Terraform deployment variables files review
+
+Now you have the terraform code to deploy the azure modules and you have template pipelines which have the steps to execute the code but how will you deploy the same module in three different environments (Dev, Pre-Prod and Production). Answer is simple - by overriding the module variables as runtime.
+
+So, before we put the template into action, it is important to understand the variables file. 
+
+- The way, template pipeline is designed, it expect the runtime variables in certain folders (tfcode/deployment/{adls|kv|rg|adf}) and in certain files (variables-{de|pp|pr}.tfvars) so please don't change the location and name of the variables files.
+
+- Each folder inside /tfcode/deployment folder represent a azure module that will be deployed.
+
+- Each module folder contains, three variables file - one for each environment (Dev|de, Pre-prod|pp and prod|pr).
+
+- Currently, all variables files inside the module are identical. You can make changes to variables files to simulate multiple environments into same subscription however, in a typical customer environment, you'll usually find different subscriptions for production and non-production service deployment.
+
+Sample Varibale file:
+```
+team_name = "ops"
+client_name = "bcmp"
+index = 1
+counter = 1
+location = "canadacentral"
+environment = "de"
+extra_tags = {}
+public_network_enabled = true
+managed_virtual_network_enabled = false
+resource_group_name = "rf-ops-bcmp-de-cacn-001"
+```
+
+## 4. Deployment pipeline review
+
+Now is the time to put everything that have learnt so far together and create the deployment pipeline.
 
 
 
