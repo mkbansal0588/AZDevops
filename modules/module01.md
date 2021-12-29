@@ -149,7 +149,23 @@ Azure Repos provides two types of version control:
 - Git: distributed version control
 - Team Foundation Version Control (TFVC): centralized version control
 
-We'll use git throughout this bootcamp session.
+We'll use git throughout this bootcamp session. Though there are variety of IDE and tools available at your disposal but for the sake of simplicity, we'll use the DevOps portal to create the repository.
+
+1. Sign in to [Azure DevOps](https://go.microsoft.com/fwlink/?LinkId=307137).
+
+2. Choose the organization and the project.
+
+![image](https://user-images.githubusercontent.com/19226157/147615994-1f2b33c8-af21-4b0c-bec1-799d2a4c0994.png)
+
+3. Click on repos. On the home page, you'll find the instructions to reference the project from rest api, command line tools and IDE such as VSCode.
+
+![image](https://user-images.githubusercontent.com/19226157/147616096-13a2097f-1b92-4d85-aa4e-7b3337c59b3e.png)
+
+We'll choose the option to import a repository; which creates a new repository and imports the files from existing and specified repositories.
+
+4. Select Repository type as "Git" and Clone URL - 
+
+
 
 ### 4a. Create a new azure repo
 
