@@ -285,6 +285,6 @@ terraform apply -auto-approve -destroy
 
 ## :tada: Summary
 
-This module provided an overview of how to create a legacy and yaml based Azure devops pipelines..
+This module provided an overview of hashicorp configuration language (HCL) and terraform commands.
 
 [Continue >](../modules/module04.md)
