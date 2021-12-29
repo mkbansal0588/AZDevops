@@ -1,6 +1,6 @@
 # Module 04 - Terraform deployment at scale
 
-[< Previous Module](../modules/module04.md) - **[Home](../README.md)**
+[< Previous Module](../modules/module03.md) - **[Home](../README.md)**
 
 ## :thinking: Prerequisites
 
@@ -29,6 +29,8 @@ In this module, you will learn about deploying terraform deployment at scale.
 | 3 | [Deployment variables files review](#3-deployment-variables-files-review) | Azure Administrator |
 | 4 | [Deployment pipeline review](#4-deployment-pipeline-review) | Azure Administrator |
 
+##
+
 ## 📚 Additional Reading
 
 ## 🧑‍💼 To-Do Activities
@@ -37,4 +39,4 @@ In this module, you will learn about deploying terraform deployment at scale.
 
 ## :tada: Summary
 
-This module provided an overview of how to create a legacy and yaml based Azure devops pipelines.
+This module provided an overview of how to do terraform deployment at scale.
