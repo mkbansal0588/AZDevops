@@ -250,6 +250,37 @@ here is how it should look like after you've added all required secrets to key v
 
 ![image](https://user-images.githubusercontent.com/19226157/147636181-903a28d1-28aa-4f90-a25a-01b8d02f85cb.png)
 
+#### 2h. Set Up Billing for Azure DevOps for running pipeline.
+
+- Login to DevOps portal.
+
+- Click on Project Settings and then click on Parallel jobs under pipeline.
+
+![image](https://user-images.githubusercontent.com/19226157/147638514-8b61b6bd-26ad-498d-9b7f-fee1a48a3ebd.png)
+
+- Currently there the number of parallel jobs purchased to be run in Microsoft hosted agents is 0 for both private and public project.
+
+- In private project section, Under Microsoft hosted, click on Change to review and update monthly purchased parallel job runs.
+
+![image](https://user-images.githubusercontent.com/19226157/147638750-017631e9-f311-4bbf-b5de-ebcaebdd81bd.png)
+
+- This should redirect you to, Billing section on Organization Settings page.
+
+![image](https://user-images.githubusercontent.com/19226157/147638848-4c5e3092-f414-46f8-9727-fdd691185a84.png)
+
+- Click on Set Up Billing and connect the Devops to subscription. 
+
+![image](https://user-images.githubusercontent.com/19226157/147638910-d83853c7-8f3d-4dc1-9340-e3a6ed6061cd.png)
+
+- Click on Save to finish the linking.
+
+- After that is done, you should be able to purchase the parallel pipeline's run.
+
+![image](https://user-images.githubusercontent.com/19226157/147639011-7ccfd8b5-ef0e-43a6-a102-034b660f9382.png)
+
+- Set the Microsoft hosted paid parallel job to 1 and then save the changes.
+
+This mark the completion of Lab setup step 2h.
 
 
 
