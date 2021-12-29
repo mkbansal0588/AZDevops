@@ -3,214 +3,217 @@
 [< Previous Module](../modules/module01.md) - **[Home](../README.md)** - [Next Module >](../modules/module02.md)
 
 ## :thinking: Prerequisites
-
 * An [Azure account](https://azure.microsoft.com/en-us/free/) with an active subscription.
-* Sign up for Azure DevOps Account (see [module 01](../modules/module01.md)).
+* Your must have permissions to create resources in your Azure subscription.
+* Your subscription must have the following resource providers registered: **Microsoft.DevOps**. Instructions on how to register a resource provider via the Azure Portal can be found [here](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types#azure-portal).
+* Signup for Azure DevOps services.
+* Create Organization and projects.
 
 ## :loudspeaker: Introduction
 
-Learn how to create an organization. An organization is used to connect groups of related projects, helping to scale up an enterprise. You can use a personal Microsoft account, GitHub account, or a work or school account. Use your work or school account to automatically connect your organization to your Azure Active Directory (Azure AD).
+In this module, you'll learn about Azure Pipelines, a feature of Azure DevOps Platform.
 
 ## :dart: Objectives
 
-* Create an organization
+* What are Azure Pipelines and its key components?
+* Create a simple pipelines using yaml syntax.
+* Create a release pipeline using classic web interface.
+* Convert a release pipelines to yaml pipeline.
 
 
-## 1. Grant the Azure Purview Managed Identity Access
+##  :bookmark_tabs: Table of Contents
 
-> :bulb: **Did you know?**
->
-> To scan a source, Azure Purview requires a set of **credentials**. For Azure Data Lake Storage Gen2, Azure Purview supports the following [authentication methods](https://docs.microsoft.com/en-gb/azure/purview/register-scan-adls-gen2#setting-up-authentication-for-a-scan).
->
-> * Managed Identity (recommended)
->* Service Principal
-> * Account Key
-> 
-> In this module we will walk through how to grant the Azure Purview Managed Identity the necessary access to successfully configure and run a scan.
+| #  | Section | Role |
+| --- | --- | --- |
+| 1 | [What is Azure Pipelines?](#1-what-is-azure-pipelines?) | Azure Administrator |
+| 2 | [Define pipelines using classic web interface](#2-define-pipelines-using-classic-web-interface) | Azure Administrator |
+| 3 | [Define pipelines using Yaml syntax](#3-define-pipelines-using-yaml-syntax) | Azure Administrator |
+| 4 | [Key Components of Azure DevOps pipelines](#4-key-components-of-azure-devops-pipelines) | Azure Administrator |
 
-1. Navigate to your Azure Data Lake Storage Gen2 account (e.g. `pvlab{randomId}adls`) and select **Access Control (IAM)** from the left navigation menu.
 
-    ![Azure Purview](../images/module02/02.06-storage-access.png)
+## 1. What is Azure Pipelines?
 
-2. Click **Add role assignments**.
+Azure Pipelines automatically builds and tests code projects to make them available to others. It works with just about any language or project type. Azure Pipelines combines continuous integration (CI) and continuous delivery (CD) to test and build your code and ship it to any target.
 
-    ![Azure Purview](../images/module02/02.07-storage-addrole.png)
+### 1a. Key Components of Azure Pipelines
 
-3. Filter the list of roles by searching for `Storage Blob Data Reader`, click the row to select the role, and then click **Next**.
+![image](https://user-images.githubusercontent.com/19226157/147626246-ac2339bc-1378-40b4-873b-228af38bfe5b.png)
 
-    ![Access Control Role](../images/module02/02.08-access-role.png)
+- A trigger initiates an Azure DevOps Pipeline to run.
+- A pipeline can have many stages. A pipeline can deploy to single or multiple environments(Dev, QA and Production).
+- A stage can be specified to manage jobs in a pipeline and each stage has various jobs.
+- Each job runs on one agent. It’s also possible that a job doesn’t have an agent.
+- Each agent runs a job that may have various steps.
+- A step can be anything like a script or task and it is the compact part of a pipeline.
+- A task is a pre-bundled script that acts like to publish a build artifact or to call a REST API.
+- A run publishes a bunch of files or bundles called an artifact.
 
-4. Under **Assign access to**, select **Managed identity**, click **+ Select members**, select **Purview account** from the **Managed Identity** drop-down menu, select the managed identity for your Azure Purview account (e.g. `pvlab-{randomId}-pv`), click **Select**. Finally, click **Review + assign**.
+In addition, there are few additionals useful components of Azure pipelines are -
 
-    ![Access Control Members](../images/module02/02.09-access-members.png)
+- Approvals specifies a set of validations needed before a deployment can be executed. It is used to manage deployments to production environments. You can implement approvals using pipeline environments. Keep in mind, pipeline environments are different from deployment environments.
 
-5. Click **Review + assign** once more to perform the role assignment.
+![image](https://user-images.githubusercontent.com/19226157/147627356-dcea837a-e21b-48cd-a579-3277bf051246.png)
 
-    ![Access Control Assign](../images/module02/02.10-access-assign.png)
+- A library is a collection of build and release assets for an Azure DevOps project. Assets defined in a library can be used in multiple build and release pipelines of the project. The Library tab can be accessed directly in Azure Pipelines. The library contains two types of assets: variable groups and secure files.
 
-4. To confirm the role has been assigned, navigate to the **Role assignments** tab and filter the **Scope** to `This resource`. You should be able to see that the Azure Purview managed identity has been granted the **Storage Blob Data Reader** role.
+![image](https://user-images.githubusercontent.com/19226157/147627421-1aaaf3bf-ce90-4f3a-86b0-4cb223543263.png)
 
-    ![Role Assignment](../images/module02/02.11-role-assignment.png)
+- A service connection to enable devops connectivity with external services.
 
-<div align="right"><a href="#module-02a---register--scan-adls-gen2">↥ back to top</a></div>
 
-## 2. Upload Data to Azure Data Lake Storage Gen2 Account
+## 2. Define pipeline using classic web interface
 
-Before proceeding with the following steps, you will need to:
+Though this method is deprecated and will not be available in future but it is a good starting point. 
 
-* Download and install [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/).
-* Open Azure Storage Explorer.
-* Sign in to Azure via **View > Account Management > Add an account...**.
+### 2a. Create a service principal
 
-1. Download a copy of the **[Bing Coronavirus Query Set](https://github.com/tayganr/purviewlab/raw/main/assets/BingCoronavirusQuerySet.zip)** to your local machine. Note: This data set was originally sourced from [Microsoft Research Open Data](https://msropendata.com/datasets/c5031874-835c-48ed-8b6d-31de2dad0654).
+There is no way to directly create a service principal using the Azure portal. When you register an application through the Azure portal, an application object and service principal are automatically created in your home directory or tenant. 
 
-2. Locate the downloaded zip file via File Explorer and unzip the contents by right-clicking the file and selecting **Extract All...**.
+Let's jump straight into creating the identity. If you run into a problem, check the required permissions to make sure your account can create the identity.
 
-    ![Extract zip file](../images/module02/02.10-explorer-unzip.png)
+- Sign in to your Azure Account through the Azure portal.
 
-3. Click **Extract**.
+- Select Azure Active Directory.
 
-    ![Extract](../images/module02/02.11-explorer-extract.png)
+- Select App registrations.
 
-4. Open Azure Storage Explorer, click on the Toggle Explorer icon, expand the Azure Subscription to find your Azure Storage Account. Right-click on Blob Containers and select **Create Blob Container**. Name the container **raw**.
+- Select New registration.
 
-    ![Create Blob Container](../images/module02/02.12-explorer-container.png)
+- Name the application. Select a supported account type, which determines who can use the application. Under Redirect URI, select Web for the type of application you want to create. Enter the URI where the access token is sent to. You can't create credentials for a Native application. You can't use that type for an automated application. After setting the values, select Register.
 
-5. With the container name selected, click on the **Upload** button and select **Upload Folder...**.
+![image](https://user-images.githubusercontent.com/19226157/147629724-fcd16d82-883b-4185-8f3e-e7f300a78602.png)
 
-    ![Upload Folder](../images/module02/02.13-explorer-upload.png)
+You've created your Azure AD application and service principal.
 
-6. Click on the **ellipsis** to select a folder.
+### 2b. Assign role to service principal on subscription
 
-    ![Browse](../images/module02/02.14-explorer-browse.png)
+To access resources in your subscription, you must assign a role to the application. Decide which role offers the right permissions for the application. To learn about the available roles, see Azure built-in roles.
 
-7. Navigate to the extracted **BingCoronavirusQuerySet** folder (e.g. Downloads\BingCoronavirusQuerySet) and click **Select Folder**.
+You can set the scope at the level of the subscription, resource group, or resource. Permissions are inherited to lower levels of scope. For example, adding an application to the Reader role for a resource group means it can read the resource group and any resources it contains.
 
-    ![Folder](../images/module02/02.15-explorer-folder.png)
+- In the Azure portal, select the level of scope you wish to assign the application to. For example, to assign a role at the subscription scope, search for and select Subscriptions, or select Subscriptions on the Home page.
 
-8. Click **Upload**.
+![image](https://user-images.githubusercontent.com/19226157/147629837-f815c03d-fbc3-44ba-a6b4-efac3a2ce7d5.png)
 
-    ![Upload](../images/module02/02.16-explorer-data.png)
+- Select the particular subscription to assign the application to.
 
-9. Monitor the **Activities** until the transfer is complete.
+![image](https://user-images.githubusercontent.com/19226157/147629883-a434fcbe-7c07-42c2-bead-85273908ba29.png)
 
-    ![Transfer Complete](../images/module02/02.17-explorer-transfer.png)
+If you don't see the subscription you're looking for, select global subscriptions filter. Make sure the subscription you want is selected for the portal.
 
-<div align="right"><a href="#module-02a---register--scan-adls-gen2">↥ back to top</a></div>
+- Select Access control (IAM).
 
-## 3. Create a Collection
+- Select Select Add > Add role assignment to open the Add role assignment page.
 
-> :bulb: **Did you know?**
->
-> [Collections](https://docs.microsoft.com/en-us/azure/purview/how-to-create-and-manage-collections) in Azure Purview can be used to organize data sources, scans, and assets in a hierarchical model based on how your organization plans to use Azure Purview. The collection hierarchy also forms the security boundary for your metadata to ensure users don't have access to data they don't need (e.g. sensitive metadata). 
->
-> For more information, check out [Collection Architectures and Best Practices](https://docs.microsoft.com/en-us/azure/purview/concept-best-practices-collections).
+- Select the Owner role. On next tab which is member tab, Add newly registered application/ service principal as member to the role. Make sure that choosen AD object type is "App". Next click on "Review + Assign" to complete the role assignment.
 
-1. Open Purview Studio, navigate to **Data Map** > **Collections**, and click  **Add a collection**.
+![image](https://user-images.githubusercontent.com/19226157/147630136-c1c3fa63-532a-453e-967c-92acdf1d6d0d.png)
 
-    ![New Collection](../images/module02/02.18-sources-collection.png)
 
-2. Provide the collection a **Name** (e.g. Contoso) and click **Create**.
+### 2c. Create a service connection
 
-    ![New Collection](../images/module02/02.76-collection-create.png)
+Complete the following steps to create a service connection for Azure Pipelines.
 
-<div align="right"><a href="#module-02a---register--scan-adls-gen2">↥ back to top</a></div>
+- Sign in to your organization (https://dev.azure.com/{yourorganization}) and select your project.
 
-## 4. Register a Source (ADLS Gen2)
+- Select Project settings > Service connections.
 
-1. Open Purview Studio, navigate to **Data Map** > **Sources**, and click on **Register**.
+![image](https://user-images.githubusercontent.com/19226157/147630261-5d5b04f0-68a1-4461-8d7f-178083fb4fbd.png)
 
-    ![Register](../images/module02/02.20-sources-register.png)
+- Select + New service connection, select the type of service connection as "Azure Resource Manager", and then select Next.
 
-2. Select **Azure Data Lake Storage Gen2** and click **Continue**.
+![image](https://user-images.githubusercontent.com/19226157/147630324-7dc509c7-2320-4d85-8229-21e97296c4f8.png)
 
-    ![Sources](../images/module02/02.21-sources-adls.png)
+- Choose recommended authentication method, i.e. Service principal (Automatic), and then select Next.
 
-3. Select the **Azure subscription**, **Storage account name**, **Collection**, and click **Register**.
+![image](https://user-images.githubusercontent.com/19226157/147630352-047f6825-9483-4ca0-be64-5c2e3a23a942.png)
 
-    > :bulb: **Did you know?**
-    >
-    > At this point, we have simply registered a data source. Assets are not written to the catalog until after a scan has finished running.
+- Give this connection a meaningful name and leave rest of things default.Select Save to create the connection.
 
-    ![Source Properties](../images/module02/02.22-sources-properties.png)
+![image](https://user-images.githubusercontent.com/19226157/147630453-85a4c9a1-2f1f-479f-a754-96769b51e76b.png)
 
-<div align="right"><a href="#module-02a---register--scan-adls-gen2">↥ back to top</a></div>
+While trying to save it, it might ask you to authenticate yourself with Azure portal. if so, do the needful and after the succesful authentication, you should be able to see a service connection on devops portal.
 
-## 5. Scan a Source with the Azure Purview Managed Identity
+![image](https://user-images.githubusercontent.com/19226157/147630632-cdffb6a9-c511-4605-8995-02052cadab62.png)
 
-1. Open Purview Studio, navigate to **Data Map** > **Sources**, and within the Azure Data Lake Storage Gen2 tile, click the **New Scan** button.
 
-    ![New Scan](../images/module02/02.23-scan-new.png)
+### 2d. Create Pipeline using Classic web interface 
 
-2. Click **Test connection** to ensure the Azure Purview managed identity has the appropriate level of access to read the Azure Data Lake Storage Gen2 account. If successful, click **Continue**.
+Before we get our hands dirty, let's understand the pipeline objective. 
+Pipeline will be used to execute the terraform code (we'll learn about it in next module) that inturn deploy azure services. We are also going to follow couple of best practices - Build generic templates for pipeline execution and use your own scripts wherever possible instead of pre-built tasks. So basically, we are going to build the generic template for terraform code execution which will be used by subsequent deployment pipelines for actual azure service deployment.
 
-    ![Test Connection](../images/module02/02.24-scan-test.png)
+Now since, we have the clarity of objective of this exercise, let get on with it.
 
-3. Expand the hierarchy to see which assets will be within the scans scope, and click **Continue**.
+- Login to Azure DevOps portal and navigate it to right project.
 
-    ![Scan Scope](../images/module02/02.25-scan-scope.png)
+- Click on Pipelines, then release and click on New Pipeline.
 
-4. Select the system default scan rule set and click **Continue**.
+![image](https://user-images.githubusercontent.com/19226157/147628419-3c865bb9-44ce-4587-91cd-986df7276c57.png)
 
-    > :bulb: **Did you know?**
-    >
-    > [Scan Rule Sets](https://docs.microsoft.com/en-us/azure/purview/create-a-scan-rule-set) determine which **File Types** and **Classification Rules** are in scope. If you want to include a custom file type or custom classification rule as part of a scan, a custom scan rule set will need to be created.
+- It opens up the pipeline build Wizard, pre-populated with sample templates however, we'll start with empty job.
 
-    ![Scan rule set](../images/module02/02.26-scan-ruleset.png)
+![image](https://user-images.githubusercontent.com/19226157/147628501-b4005cb4-daf1-4720-b922-1136a21823e4.png)
 
-5. Select **Once** and click **Continue**.
+- It opens up the stage page next, first let's give the name to the stage and close the window. We are going to call this stage "deployToDevelopment"
 
-    ![Scan Trigger](../images/module02/02.27-scan-trigger.png)
+![image](https://user-images.githubusercontent.com/19226157/147628769-db37ebcd-fe20-4877-aa16-a681a2104b46.png)
 
-6. Click **Save and Run**.
+- Now if you'll notice, pipeline currently have a job but no tasks. Let's add some tasks to add meaning to this job.
 
-    ![Run Scan](../images/module02/02.28-scan-run.png)
+![image](https://user-images.githubusercontent.com/19226157/147628868-4b2ed167-ffbc-4b2e-9777-def1c3a5e137.png)
 
-7. To monitor the progress of the scan run, click **View Details**.
+- First up, you'll see option to configure the Agent. This is the agent that will actually run this pipeline. You have an option to change agent job name, Agent pool (Use default) and specification (Choose ubuntu-latest). Use rest as defaults.
 
-    ![View Details](../images/module02/02.29-sources-details.png)
+![image](https://user-images.githubusercontent.com/19226157/147629071-3c96586c-c21b-473d-8d2a-d511261f7b21.png)
 
-8. Click **Refresh** to periodically update the status of the scan. Note: It will take approximately 5 to 10 minutes to complete.
+- Next, click on plus icon on Agent job to add tasks to this job. Basically, we need to following tasks (in the order specified below) to the job
+  
+  - Task to extract secrets from key vault
+  
+  - Task to install latest version of terraform.
+  
+  - Bash script to initialize terraform (terraform init)
+  
+  - Bash script to generate a terraform execution plan (terraform plan)
+  
+  - Bash script to apply the terraform plan (terraform apply)
 
-    ![Monitor Scan](../images/module02/02.30-sources-refresh.png)
+- Click on plus icon and search for "key vault" in Add tasks pane. Click on "Azure Key Vault (Description - Download Azure Key Vault Secrets)" . This task now should be added to the queue. Click on the task to configure it. Give this task a meaningful name, choose the service connection that was created in Step 2c , enter test in keyvault name section and leave rest of the configuration parameters as default.
 
-<div align="right"><a href="#module-02a---register--scan-adls-gen2">↥ back to top</a></div>
+----------------------- ------------------------------------
+## ❗ Note 
 
-## 6. View Assets
+Since, we currently don't have any key vault created, you don't have the option to choose from drop down list. 
 
-1. Navigate to **Purview Studio** > **Data catalog**, and perform a wildcard search by typing the asterisk character (`*`) into the search box and hitting the Enter key to submit the query.
+----------------------------------------------------------------
 
-    ![](../images/module02/02.80-wildcard-search.png)
+- Click on plus icon to add another task. This time around, search for terraform and choose first one that pops up in the search. This task most likely show up in marketplace however, it is available to use for free so click on "Get It free" and follow the instructions to install it in your devops organization.
 
-2. You should be able to see a list of assets within the search results, which is a result of the scan.
+![image](https://user-images.githubusercontent.com/19226157/147631300-040abdea-7b77-4d0f-9125-89ded5cbab99.png)
 
-    ![](../images/module02/02.72-search-wildcard.png)
+Come back to your add devops portal, add task pane and refresh it before looking up for terraform again. This time around, choose task named "Terraform tool installer" and click on Add. 
 
-<div align="right"><a href="#module-02a---register--scan-adls-gen2">↥ back to top</a></div>
+![image](https://user-images.githubusercontent.com/19226157/147631420-001a1904-97c1-4cfe-b140-c0bd290e7241.png)
 
-## :mortar_board: Knowledge Check
+There is no need to configure this task. This task will automatically fetch the latest version of terraform and install it on pipeline agent.
 
-[http://aka.ms/purviewlab/q02](http://aka.ms/purviewlab/q02)
+- Next add a new task and search for "Bash" and click on Add Task. Click on the task to configure it. Click on script type as "Inline" and type the following block of code in script section. 
 
-1. What type of object can help organize data sources into logical groups?
+```
+terraform -chdir="${{ parameters.workingDirectory }}" init \
+                -plugin-dir="../faa-tf-common-files/plugins" \
+                -reconfigure \
+                -backend-config="storage_account_name=${{ parameters.backendAzureRmStorageAccountName }}" \
+                -backend-config="container_name=${{ parameters.backendAzureRmContainerName }}" \
+                -backend-config="key=${{ parameters.backendAzureRmKey }}" \
+                -backend-config="resource_group_name=${{ parameters.backendAzureRmResourceGroupName }}" \
+                -backend-config="subscription_id=$(subscriptionid)" \
+                -backend-config="tenant_id=$(tenantid)" \
+                -backend-config="client_id=$(clientid)" \
+                -backend-config="client_secret=$(clientsecret)"
+ ```
 
-    A ) Buckets    
-    B ) Collections  
-    C ) Groups  
 
-2. At which point does Azure Purview begin to populate the data map with assets?
-
-    A ) After an Azure Purview account is created  
-    B ) After a Data Source has been registered    
-    C ) After a Data Source has been scanned
-
-3. Which of the following attributes is **not** automatically assigned to an asset as a result of the system-built scanning functionality?
-
-    A ) Technical Metadata (e.g. Fully Qualified Name, Path, Schema, etc)  
-    B ) Glossary Terms (e.g. column `Sales Tax` is tagged with the `Sales Tax` glossary term)  
-    C ) Classifications (e.g. column `ccnum` is tagged with the `Credit Card Number` classification)  
-
-<div align="right"><a href="#module-02a---register--scan-adls-gen2">↥ back to top</a></div>
 
 ## 📚 Additional Reading
 
@@ -221,7 +224,7 @@ Read and understand [how to Plan your organizational structure](https://docs.mic
 
 This module provided an overview of how to create a collection, register a source, and trigger a scan.
 
-[Continue >](../modules/module02b.md)
+[Continue >](../modules/module03.md)
 
 
 
