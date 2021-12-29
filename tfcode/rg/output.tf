@@ -1,15 +1,14 @@
 output "name" {
   value       = azurerm_resource_group.rg[*].name
-  description = "Le nom du ressource groupe cree"
+  description = "Resource group names"
 }
 
 output "id" {
   value       = azurerm_resource_group.rg[*].id
-  description = "L,id du ressource groupe cree"
+  description = "Resource group ids"
 }
 
 output "location" {
   value       = azurerm_resource_group.rg[*].location
-  description = "Location du resource group"
+  description = "Resource group location"
 }
-
