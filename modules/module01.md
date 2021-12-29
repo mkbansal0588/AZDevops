@@ -1,6 +1,6 @@
 # Module 01 - Azure DevOps
 
-[< Previous Module](../modules/module00.md) - **[Home](../README.md)** - [Next Module >](../modules/module02.md)
+**[Home](../README.md)** - [Next Module >](../modules/module02.md)
 
 ## :thinking: Prerequisites
 
@@ -31,8 +31,6 @@ In this module, you will learn about Azure DevOps platform.
 | 3 | [Manage your project](#3-manage-your-project) | Azure Administrator |
 | 4 | [Azure Repos](#4-azure-repos) | Azure Administrator |
 | 5 | [Release Flow](#5-Release-Flow) | Azure Administrator |
-| 6 | [Introduction to Azure Pipelines](#6-Introduction-to-Azure-Pipelines) | Azure Administrator |
-| 7 | [Agent Pools](#7-Agent-Pools) | Azure Administrator |
 
 <div align="right"><a href="#module-01---create-an-azure-purview-account">↥ back to top</a></div>
 
@@ -149,20 +147,107 @@ Azure Repos provides two types of version control:
 - Git: distributed version control
 - Team Foundation Version Control (TFVC): centralized version control
 
-We'll use git throughout this bootcamp session.
+We'll use git throughout this bootcamp session. Though there are variety of IDE and tools available at your disposal but for the sake of simplicity, we'll use the DevOps portal to create the repository.
 
 ### 4a. Create a new azure repo
 
+1. Sign in to [Azure DevOps](https://go.microsoft.com/fwlink/?LinkId=307137).
+
+2. Choose the organization and the project.
+
+![image](https://user-images.githubusercontent.com/19226157/147615994-1f2b33c8-af21-4b0c-bec1-799d2a4c0994.png)
+
+3. Click on repos. On the home page, you'll find the instructions to reference the project from rest api, command line tools and IDE such as VSCode.
+
+![image](https://user-images.githubusercontent.com/19226157/147616096-13a2097f-1b92-4d85-aa4e-7b3337c59b3e.png)
+
+We'll choose the option to import a repository; which creates a new repository and imports the files from existing and specified repositories.
+
+4. Select Repository type as "Git" and Clone URL - https://github.com/mkbansal0588/AZDevops.git
+
+![image](https://user-images.githubusercontent.com/19226157/147616212-38dcc5d1-411e-4929-9f2e-2fa77c6efed6.png)
+
+Leave the authentication required option unchecked and click on import.
+
+![image](https://user-images.githubusercontent.com/19226157/147616240-a0a2f3eb-23f5-48c6-8e5a-aefebe9e48be.png)
+
+5. It might take few minutes before, it creates the repository and clone the files from specified repositories. After successful import, you should be able to view the files.
+
+![image](https://user-images.githubusercontent.com/19226157/147616297-f501c4b4-1ef5-44ac-99c1-229d1329cb2a.png)
+
+6. Repository takes its name after the name of the project however, if you would like, you can change it afterwards.
+
+
+### 4b. Branches
+
+A branch represents an independent line of development. Branches serve as an abstraction for the edit/stage/commit process. You can think of them as a way to request a brand new working directory, staging area, and project history. 
+
+#### How are Azure Repos' branches created?
+
+1. View your repo's branches by selecting Repos > Branches while viewing your repo on the web.
+
+![image](https://user-images.githubusercontent.com/19226157/147616696-7e0e84d4-7ca3-4913-bbd6-78315ca6ddc0.png)
+
+2. Select New branch in the upper-right corner of the page.
+
+![image](https://user-images.githubusercontent.com/19226157/147616712-bb2a9a1f-417c-4d62-88b1-2888c4d0cc8b.png)
+
+3. In the Create a branch dialog box, enter a name for your new branch, select a branch to base the work off of, and associate any work items.
+
+![image](https://user-images.githubusercontent.com/19226157/147616723-1428f63e-bc08-4d2b-9c32-a1717815d58d.png)
+
+4. Select Create branch.
+
+----------------------- ------------------------------------
+## ❗ Note 
+
+You will need to fetch the branch before you can see it and swap to it in your local repo.
+
+----------------------------------------------------------------
 
 
 ## 5. Release Flow
 
-## 6. Introduction to Azure Pipelines
+For teams with more than one engineer, where engineers includes both developers and operations, we need to consider how we are going to allow them to collaborate on code and track changes, one of the early decisions for the team is therefore what branching methodology to use. This is particularly relevant since we should also be including Infrastructure-as-Code in our source control and will allows us to back track to see what changes were made and when to help with issue resolution.
 
-## 7. Agent Pools
+Release Flow is a trunk-based development approach that utilizes branches off the master trunk for specific topics as opposed to other trunk-based developments that continuously deploy to the trunk. 
+
+From a high-level point of view the Release Flow branching strategy can be illustrated this way:
+
+![image](https://user-images.githubusercontent.com/19226157/147617295-30128d0b-3f1b-4d79-8eab-48f086115cec.png)
+
+- It has a single collaboration branch – master.
+- The changes performed in feature branches (topics) and delivered to a master branch by raising a pull request which contains quality gates like:
+   - Build policies
+   - Unit testing
+   - Static code analysis
+   - Peer reviews
+- Release branches created to deliver the code to deployment targets
+- For hotfixes for important patches that need to be made quickly, the change should be first made in the master branch (so that it isn't lost in the next release) and then "cherry picked" into the release branch. The cherry picking creates a new pull request that targets the release branch applying the changes that were made into the master branch into the release.
+
+![image](https://user-images.githubusercontent.com/19226157/147622934-22f47302-33f7-4d7b-9d7f-7fd61341a51d.png)
+
+In Azure DevOps this flow results into a corresponding branching layout:
+
+![image](https://user-images.githubusercontent.com/19226157/147623100-5fc43ee3-f65b-4244-a87d-f862cc7d61bc.png)
+
+The pipeline also has to be a “branching strategy” aware. It should detect the current branch path and trigger only needed stages. An example of the pipeline flow:
+
+![image](https://user-images.githubusercontent.com/19226157/147617177-249a576a-31ee-4d9e-9507-3f3af3cceb54.png)
+
+- Feature branch: Builds the code and releases it to the test environment only
+- Release branch: Builds the code, releases it to the acceptance and after approval to production environments
+- Pull request: Continuous Delivery is not needed, therefore the code building happens
+
+## 🧑‍💼 To-Do Activities
+
+- Exercise 1: Rename the repository and give it a meaningful name.
+- Exercise 2: Since main/master branch is single source of truth, secure the branch. ( Hint - Read about security policies )
+- Exercise 3: Try making modification to readme file in main/master branch. Try it prior to and after the exercise # 2.
+- Exercise 4: Create a feature/topic branch, make some modifications and tried merging the changes to main/master branching using a pull request.
 
 ## :tada: Summary
 
-This module provided an overview of how to sign up for an Azure DevOps service.
+This module provided an overview of Azure DevOps platform.
 
-[Continue >](../modules/module02a.md)
+[Continue >](../modules/module02.md)
