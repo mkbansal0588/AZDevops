@@ -28,7 +28,6 @@ In this module, you'll learn about Azure Pipelines, a feature of Azure DevOps Pl
 | 1 | [What is Azure Pipelines?](#1-what-is-azure-pipelines?) | Azure Administrator |
 | 2 | [Define pipelines using classic web interface](#2-define-pipelines-using-classic-web-interface) | Azure Administrator |
 | 3 | [Define pipelines using Yaml syntax](#3-define-pipelines-using-yaml-syntax) | Azure Administrator |
-| 4 | [Key Components of Azure DevOps pipelines](#4-key-components-of-azure-devops-pipelines) | Azure Administrator |
 
 
 ## 1. What is Azure Pipelines?
@@ -65,8 +64,7 @@ In addition, there are few additionals useful components of Azure pipelines are 
 
 Though this method is deprecated and will be removed in future but it is a good starting point. 
 
-Before we get our hands dirty, let's understand the pipeline objective. 
-Pipeline will be used to execute the terraform code (we'll learn about it in next module) that inturn deploy azure services. We are also going to follow couple of best practices - Build generic templates for pipeline execution and use your own scripts wherever possible instead of pre-built tasks. So basically, we are going to build the generic template for terraform code execution which will be used by subsequent deployment pipelines for actual azure service deployment.
+Before we get our hands dirty, let's understand the pipeline objective. The primary objective for this pipeline will be to read the terraform code from Azure repository and deploy the services to Azure subscription.
 
 Now since, we have the clarity of objective of this exercise, let get on with it.
 
@@ -103,6 +101,8 @@ Now since, we have the clarity of objective of this exercise, let get on with it
   - Bash script to generate a terraform execution plan (terraform plan)
   
   - Bash script to apply the terraform plan (terraform apply)
+  
+  - Bash script to destroy the build azure services (terraform apply -destroy)
 
 - Click on plus icon and search for "key vault" in Add tasks pane. Click on "Azure Key Vault (Description - Download Azure Key Vault Secrets)" . This task now should be added to the queue. Click on the task to configure it. Give this task a meaningful name, choose the service connection and keyvault from drop down list. Leave rest of the configuration parameters as default. This task will download the secrets from key vaults and set them up as variables to be used in subsequent steps in pipeline.
 
@@ -227,18 +227,278 @@ Congratulations! you have successfully created your first pipeline.
 
 ## 3. Define pipeline using yaml syntax
 
+In this section of the module, you'll learn to create the Azure pipeline to deploy resources defined in terraform code. It is the same pipeline that we created in Step # 2 of this module however, this time around we'll write the YAML code to build the pipeline.
+
+- Easiest way to find the YAML code for various tasks is to leverage already built release pipeline using web interface. Release pipeline tasks have built in features to translate the task and provide an YAML equivalent.
+
+![image](https://user-images.githubusercontent.com/19226157/147644962-74722a2a-9c42-4fce-af2b-fb59990cf9ec.png)
+
+![image](https://user-images.githubusercontent.com/19226157/147645001-606bfefc-da5c-4c12-9a6a-faf9d62e48c8.png)
+
+So, here is the yaml equivalent code for all of pipeline tasks:
+
+```
+variables:
+  storage_account_name: 'exampleapp12292021'
+  container_name: 'statefiles'
+  key: 'resourceGroup.tfstate'
+  resource_group_name: 'example-app'
+  
+steps:
+- task: AzureKeyVault@2
+  displayName: 'Azure Key Vault: exampleapp12292021'
+  inputs:
+    azureSubscription: 'example-app-service-connection'
+    KeyVaultName: exampleapp12292021
+
+steps:
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+  displayName: 'Install Terraform latest'
+
+steps:
+- bash: |
+   terraform init \
+                   -reconfigure \
+                   -backend-config="storage_account_name=$(storage_account_name)" \
+                   -backend-config="container_name=$(container_name)" \
+                   -backend-config="key=$(key)" \
+                   -backend-config="resource_group_name=$(resource_group_name)" \
+                   -backend-config="subscription_id=$(subscriptionid)" \
+                   -backend-config="tenant_id=$(tenantid)" \
+                   -backend-config="client_id=$(clientid)" \
+                   -backend-config="client_secret=$(clientsecret)"
+  workingDirectory: '$(System.DefaultWorkingDirectory)/_cambansal0588/tfcode/rg'
+  displayName: 'Terraform init'
+
+steps:
+- bash: |
+   az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+   export ARM_CLIENT_ID=$(clientid)
+   export ARM_CLIENT_SECRET=$(clientsecret)
+   export ARM_TENANT_ID=$(tenantid)
+   export AZURE_CLIENT_ID=$(clientid)
+   export AZURE_CLIENT_SECRET=$(clientsecret)
+   export AZURE_TENANT_ID=$(tenantid)
+   export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+   terraform plan -out $(Build.BuildId).plan
+  workingDirectory: '$(System.DefaultWorkingDirectory)/_cambansal0588/tfcode/rg'
+  displayName: 'Terraform plan'
+
+steps:
+- bash: |
+   az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+   export ARM_CLIENT_ID=$(clientid)
+   export ARM_CLIENT_SECRET=$(clientsecret)
+   export ARM_TENANT_ID=$(tenantid)
+   export AZURE_CLIENT_ID=$(clientid)
+   export AZURE_CLIENT_SECRET=$(clientsecret)
+   export AZURE_TENANT_ID=$(tenantid)
+   export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+   terraform apply -auto-approve $(Build.BuildId).plan
+  workingDirectory: '$(System.DefaultWorkingDirectory)/_cambansal0588/tfcode/rg'
+  displayName: 'Terraform apply'
+  
+steps:
+- bash: |
+   az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+   export ARM_CLIENT_ID=$(clientid)
+   export ARM_CLIENT_SECRET=$(clientsecret)
+   export ARM_TENANT_ID=$(tenantid)
+   export AZURE_CLIENT_ID=$(clientid)
+   export AZURE_CLIENT_SECRET=$(clientsecret)
+   export AZURE_TENANT_ID=$(tenantid)
+   export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+   terraform apply -auto-approve -destroy
+  workingDirectory: '$(System.DefaultWorkingDirectory)/_cambansal0588/tfcode/rg'
+  displayName: 'terraform destroy'
+  
+  ```
+
+- Next, we need to find the YAML code to add a [Stage](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/stages?view=azure-devops&tabs=yaml) and [Job](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs?view=azure-devops).
+
+```
+stages:
+- stage: A
+  pool: StageAPool
+  jobs:
+  - job: A1 # will run on "StageAPool" pool based on the pool defined on the stage
+  - job: A2 # will run on "JobPool" pool
+    pool: JobPool
+    
+ jobs:
+- deployment: string   # name of the deployment job, A-Z, a-z, 0-9, and underscore. The word "deploy" is a keyword and is unsupported as the deployment name.
+  displayName: string  # friendly name to display in the UI
+  pool:                # not required for virtual machine resources
+    name: string       # Use only global level variables for defining a pool name. Stage/job level variables are not supported to define pool name.
+    demands: string | [ string ]
+  workspace:
+    clean: outputs | resources | all # what to clean up before the job runs
+  dependsOn: string
+  condition: string
+  continueOnError: boolean                # 'true' if future jobs should run even if this job fails; defaults to 'false'
+  container: containerReference # container to run this job inside
+  services: { string: string | container } # container resources to run as a service container
+  timeoutInMinutes: nonEmptyString        # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: nonEmptyString  # how much time to give 'run always even if cancelled tasks' before killing them
+  variables: # several syntaxes, see specific section
+  environment: string  # target environment name and optionally a resource name to record the deployment history; format: <environment-name>.<resource-name>
+  strategy:
+    runOnce:    #rolling, canary are the other strategies that are supported
+      deploy:
+        steps: [ script | bash | pwsh | powershell | checkout | task | templateReference ]
+```
+
+- Lastly, we need to add [repositories](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/resources?view=azure-devops&tabs=schema) to specify the pipeline resources.
+
+```
+resources:
+  repositories:
+  - repository: string  # identifier (A-Z, a-z, 0-9, and underscore)
+    type: enum  # see the following "Type" topic
+    name: string  # repository name (format depends on `type`)
+    ref: string  # ref name to use; defaults to 'refs/heads/main'
+    endpoint: string  # name of the service connection to use (for types that aren't Azure Repos)
+    trigger:  # CI trigger for this repository, no CI trigger if skipped (only works for Azure Repos)
+      branches:
+        include: [ string ] # branch names which trigger a build
+        exclude: [ string ] # branch names which won't
+      tags:
+        include: [ string ] # tag names which trigger a build
+        exclude: [ string ] # tag names which won't
+      paths:
+        include: [ string ] # file paths which must match to trigger a build
+        exclude: [ string ] # file paths which won't trigger a build
+```
+
+- So the pipeline roughly translate to following YAML code.
+
+```
+variables:
+  storage_account_name: 'exampleapp12292021'
+  container_name: 'statefiles'
+  key: 'resourceGroup.tfstate'
+  resource_group_name: 'example-app'
+
+resources:
+  repositories:
+  - repository: cambansal0588 #Change it
+    type: git
+    name: cambansal0588/cambansal0588 # change it
 
 
 
+stages:
+- stage: 'deploymentToDevelopment'
+  jobs:
+  - deployment: 
+    displayName: 'Deploying ResourceGroup'
+    pool: 
+      name: 'Azure Pipelines'
+    environment: build #changeit
+    workspace:
+      clean: all
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+            path: '_cambansal0588' #changeit
+            
+          - task: AzureKeyVault@2
+            displayName: 'Azure Key Vault: exampleapp12292021' # changeit
+            inputs:
+              azureSubscription: 'example-app-service-connection' #changeit
+              KeyVaultName: exampleapp12292021 # changeit
+
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+            displayName: 'Install Terraform latest'
+
+
+          - bash: |
+              terraform init \
+                   -reconfigure \
+                   -backend-config="storage_account_name=$(storage_account_name)" \
+                   -backend-config="container_name=$(container_name)" \
+                   -backend-config="key=$(key)" \
+                   -backend-config="resource_group_name=$(resource_group_name)" \
+                   -backend-config="subscription_id=$(subscriptionid)" \
+                   -backend-config="tenant_id=$(tenantid)" \
+                   -backend-config="client_id=$(clientid)" \
+                   -backend-config="client_secret=$(clientsecret)"
+            workingDirectory: '$(System.DefaultWorkingDirectory)/tfcode/rg'
+            displayName: 'Terraform init'
+            
+          - bash: |
+              az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+              export ARM_CLIENT_ID=$(clientid)
+              export ARM_CLIENT_SECRET=$(clientsecret)
+              export ARM_TENANT_ID=$(tenantid)
+              export AZURE_CLIENT_ID=$(clientid)
+              export AZURE_CLIENT_SECRET=$(clientsecret)
+              export AZURE_TENANT_ID=$(tenantid)
+              export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+              terraform plan -out $(Build.BuildId).plan
+            workingDirectory: '$(System.DefaultWorkingDirectory)/tfcode/rg'
+            displayName: 'Terraform plan'
+
+
+          - bash: |
+              az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+              export ARM_CLIENT_ID=$(clientid)
+              export ARM_CLIENT_SECRET=$(clientsecret)
+              export ARM_TENANT_ID=$(tenantid)
+              export AZURE_CLIENT_ID=$(clientid)
+              export AZURE_CLIENT_SECRET=$(clientsecret)
+              export AZURE_TENANT_ID=$(tenantid)
+              export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+              terraform apply -auto-approve $(Build.BuildId).plan
+            workingDirectory: '$(System.DefaultWorkingDirectory)/tfcode/rg'
+            displayName: 'Terraform Apply'
+            
+            
+          - bash: |
+              az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+              export ARM_CLIENT_ID=$(clientid)
+              export ARM_CLIENT_SECRET=$(clientsecret)
+              export ARM_TENANT_ID=$(tenantid)
+              export AZURE_CLIENT_ID=$(clientid)
+              export AZURE_CLIENT_SECRET=$(clientsecret)
+              export AZURE_TENANT_ID=$(tenantid)
+              export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+              terraform apply -auto-approve -destroy
+            workingDirectory: '$(System.DefaultWorkingDirectory)/tfcode/rg'
+            displayName: 'Terraform destroy'
+```
+
+- Copy this code and click on Pipelines under Pipelines , and then click on create new pipeline.
+
+![image](https://user-images.githubusercontent.com/19226157/147649338-34977f65-e63b-466e-b6c2-d0b286e407d7.png)
+
+- Connect to Azure Repos Git. Choose the existing repository and then click on starter pipeline. Wipe the code from starter pipeline clean and the paste the copied content from here.
+Then Click on "Save and Run".
+
+![image](https://user-images.githubusercontent.com/19226157/147649658-4fe5681c-c68f-4fa8-87cd-fefe94d829ca.png)
+
+
+- Pipeline may request for authorization before it can actually run.
+
+![image](https://user-images.githubusercontent.com/19226157/147648245-a786bf12-0f20-4894-a063-e531026cd98d.png)
+
+Click View and new windows opens up with option to Permit pipeline execution.
+
+![image](https://user-images.githubusercontent.com/19226157/147648285-3d233699-7dbe-4bfd-b6b5-ba188aeb93c2.png)
+
+- After pipeline obtain all the necessary permissions, it should start the execution. A successful execution will look something like this in screenshot -
+
+![image](https://user-images.githubusercontent.com/19226157/147648896-0115543e-0f2c-4acf-aea3-b2997645ff92.png)
+
+Congratulations, you have created your first yaml pipeline.
 
 ## 📚 Additional Reading
 
-Read and understand [how to Plan your organizational structure](https://docs.microsoft.com/en-us/azure/devops/user-guide/plan-your-azure-devops-org-structure?view=azure-devops).
-
-
 ## :tada: Summary
 
-This module provided an overview of how to create a collection, register a source, and trigger a scan.
+This module provided an overview of how to create a legacy and yaml based Azure devops pipelines..
 
 [Continue >](../modules/module03.md)
 
