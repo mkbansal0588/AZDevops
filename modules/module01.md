@@ -214,10 +214,32 @@ For teams with more than one engineer, where engineers includes both developers 
 
 Release Flow is a trunk-based development approach that utilizes branches off the master trunk for specific topics as opposed to other trunk-based developments that continuously deploy to the trunk. 
 
+From a high-level point of view the Release Flow branching strategy can be illustrated this way:
+
 ![image](https://user-images.githubusercontent.com/19226157/147617295-30128d0b-3f1b-4d79-8eab-48f086115cec.png)
 
+- It has a single collaboration branch – master.
+- The changes performed in feature branches (topics) and delivered to a master branch by raising a pull request which contains quality gates like:
+   - Build policies
+   - Unit testing
+   - Static code analysis
+   - Peer reviews
+- Release branches created to deliver the code to deployment targets
+- For hotfixes for important patches that need to be made quickly, the change should be first made in the master branch (so that it isn't lost in the next release) and then "cherry picked" into the release branch. The cherry picking creates a new pull request that targets the release branch applying the changes that were made into the master branch into the release.
+
+![image](https://user-images.githubusercontent.com/19226157/147622934-22f47302-33f7-4d7b-9d7f-7fd61341a51d.png)
+
+In Azure DevOps this flow results into a corresponding branching layout:
+
+![image](https://user-images.githubusercontent.com/19226157/147623100-5fc43ee3-f65b-4244-a87d-f862cc7d61bc.png)
+
+The pipeline also has to be a “branching strategy” aware. It should detect the current branch path and trigger only needed stages. An example of the pipeline flow:
 
 ![image](https://user-images.githubusercontent.com/19226157/147617177-249a576a-31ee-4d9e-9507-3f3af3cceb54.png)
+
+- Feature branch: Builds the code and releases it to the test environment only
+- Release branch: Builds the code, releases it to the acceptance and after approval to production environments
+- Pull request: Continuous Delivery is not needed, therefore the code building happens
 
 
 ## 6. Introduction to Azure Pipelines
