@@ -180,8 +180,37 @@ Leave the authentication required option unchecked and click on import.
 6. Repository takes its name after the name of the project however, if you would like, you can change it afterwards.
 
 
+### 4b. Branches
+
+A branch represents an independent line of development. Branches serve as an abstraction for the edit/stage/commit process. You can think of them as a way to request a brand new working directory, staging area, and project history. 
+
+#### How are Azure Repos' branches created?
+
+1. View your repo's branches by selecting Repos > Branches while viewing your repo on the web.
+
+![image](https://user-images.githubusercontent.com/19226157/147616696-7e0e84d4-7ca3-4913-bbd6-78315ca6ddc0.png)
+
+2. Select New branch in the upper-right corner of the page.
+
+![image](https://user-images.githubusercontent.com/19226157/147616712-bb2a9a1f-417c-4d62-88b1-2888c4d0cc8b.png)
+
+3. In the Create a branch dialog box, enter a name for your new branch, select a branch to base the work off of, and associate any work items.
+
+![image](https://user-images.githubusercontent.com/19226157/147616723-1428f63e-bc08-4d2b-9c32-a1717815d58d.png)
+
+4. Select Create branch.
+
+----------------------- ------------------------------------
+## ❗ Note 
+
+You will need to fetch the branch before you can see it and swap to it in your local repo.
+
+----------------------------------------------------------------
+
 
 ## 5. Release Flow
+
+
 
 ## 6. Introduction to Azure Pipelines
 
