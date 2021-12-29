@@ -151,6 +151,8 @@ Azure Repos provides two types of version control:
 
 We'll use git throughout this bootcamp session. Though there are variety of IDE and tools available at your disposal but for the sake of simplicity, we'll use the DevOps portal to create the repository.
 
+### 4a. Create a new azure repo
+
 1. Sign in to [Azure DevOps](https://go.microsoft.com/fwlink/?LinkId=307137).
 
 2. Choose the organization and the project.
@@ -163,11 +165,19 @@ We'll use git throughout this bootcamp session. Though there are variety of IDE 
 
 We'll choose the option to import a repository; which creates a new repository and imports the files from existing and specified repositories.
 
-4. Select Repository type as "Git" and Clone URL - 
+4. Select Repository type as "Git" and Clone URL - https://github.com/mkbansal0588/AZDevops.git
 
+![image](https://user-images.githubusercontent.com/19226157/147616212-38dcc5d1-411e-4929-9f2e-2fa77c6efed6.png)
 
+Leave the authentication required option unchecked and click on import.
 
-### 4a. Create a new azure repo
+![image](https://user-images.githubusercontent.com/19226157/147616240-a0a2f3eb-23f5-48c6-8e5a-aefebe9e48be.png)
+
+5. It might take few minutes before, it creates the repository and clone the files from specified repositories. After successful import, you should be able to view the files.
+
+![image](https://user-images.githubusercontent.com/19226157/147616297-f501c4b4-1ef5-44ac-99c1-229d1329cb2a.png)
+
+6. Repository takes its name after the name of the project however, if you would like, you can change it afterwards.
 
 
 
