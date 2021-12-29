@@ -307,6 +307,25 @@ Pipeline execution environment is mandatory part of job schema. Pipeline executi
 
 ![image](https://user-images.githubusercontent.com/19226157/147650535-1d1a2e6b-89d9-4b17-8048-3ef94edad260.png)
 
+- Create another environment and call it deploy.
+
+- After it is created, click on the environment and then click on Approvals.
+
+![image](https://user-images.githubusercontent.com/19226157/147705358-6ee090d8-e89b-4ef0-9021-8e7211514b18.png)
+
+- In approval pane, add yourself as approver and then click "Create".
+
+![image](https://user-images.githubusercontent.com/19226157/147705435-ff25cc0c-166d-423e-abdc-d4f97bd33e84.png)
+
+![image](https://user-images.githubusercontent.com/19226157/147705455-5244922d-e0e2-4412-abbe-03b5f6e3dfa0.png)
+
+
+## :tada: Summary
+
+Lab set up for modules to come.
+
+[Continue >](../modules/module01.md)
+
 
 
 
