@@ -21,6 +21,10 @@ provider "azuread" {
   version = ">1.1.0"
 }
 
+locals {
+  default_tags = {}
+}
+
 data "azurerm_resource_group" "resourceGroup" {
   name = var.resource_group_name
 }
