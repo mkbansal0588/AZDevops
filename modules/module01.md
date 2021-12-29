@@ -1,6 +1,6 @@
 # Module 01 - Azure DevOps
 
-**[Home](../README.md)** - [Next Module >](../modules/module02.md)
+[< Previous Module](../modules/module00.md) - **[Home](../README.md)** - [Next Module >](../modules/module02.md)
 
 ## :thinking: Prerequisites
 
