@@ -244,10 +244,19 @@ The pipeline also has to be a “branching strategy” aware. It should detect t
 
 ## 6. Introduction to Azure Pipelines
 
+
+
 ## 7. Agent Pools
+
+## 🧑‍💼 To-Do Activities
+
+- Exercise 1: Rename the repository and give it a meaningful name.
+- Exercise 2: Since main/master branch is single source of truth, secure the branch. ( Hint - Read about security policies )
+- Exercise 3: Tried making modification to readme file in main/master branch. Please try it prior to and after the exercise 3.
+- Exercise 4: Create a feature/topic branch, make some modifications and tried merging the changes to main/master branching using a pull request.
 
 ## :tada: Summary
 
-This module provided an overview of how to sign up for an Azure DevOps service.
+This module provided an overview of Azure DevOps platform.
 
-[Continue >](../modules/module02a.md)
+[Continue >](../modules/module02.md)
