@@ -47,9 +47,6 @@ parameters:
     displayName: "Repository to use to trigger the deployment."
     type: string
     default: ""
-  - name: repos
-    displayName: "repos to download"
-    type: object
   - name: secrets
     displayName: "secrets to download"
     type: string
@@ -72,10 +69,9 @@ jobs:
       runOnce:
         deploy:
           steps:
-          - ${{ each repo in parameters.repos }}:
-              - checkout: ${{ repo }}
-                path: ${{ repo }}   
-                
+          - checkout: self
+            path: repo
+            
           - task: AzureKeyVault@1
             inputs:
               azureSubscription: '${{ parameters.backendServiceArm }}'
