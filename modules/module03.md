@@ -5,7 +5,6 @@
 ## :thinking: Prerequisites
 * An [Azure account](https://azure.microsoft.com/en-us/free/) with an active subscription.
 * Your must have permissions to create resources in your Azure subscription.
-* Your subscription must have the following resource providers registered: **Microsoft.DevOps**. Instructions on how to register a resource provider via the Azure Portal can be found [here](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types#azure-portal).
 * Azure CLI to enable login to Azure subscription and deploy resources.
 
 ## :loudspeaker: Introduction
