@@ -12,7 +12,3 @@ output "vault_uri" {
   description = "The URI of the Key Vault, used for performing operations on keys and secrets"
   value = azurerm_key_vault.keyVault[*].vault_uri
 }
-
-output "kv_custom_dns_configs" {
-  value = module.pep[*].custom_dns_configs
-}
