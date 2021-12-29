@@ -82,7 +82,11 @@ Now since, we have the clarity of objective of this exercise, let get on with it
 
 ![image](https://user-images.githubusercontent.com/19226157/147628769-db37ebcd-fe20-4877-aa16-a681a2104b46.png)
 
-- Now if you'll notice, pipeline currently have a job but no tasks. Let's add some tasks to add meaning to this job.
+- Before we proceed with configuring jobs and tasks, let's add resources/artifacts to this pipeline. Click on "pipeline" tab and "add the artifacts" for the pipeline. Choose Azure DevOps Repository as artifact and provide repository name and branch name.
+
+![image](https://user-images.githubusercontent.com/19226157/147643159-eff18ef3-e43a-4951-8099-a6b88ce3261b.png)
+
+- Next you'll notice, pipeline currently have a job but no tasks. Let's add some tasks to add meaning to this job.
 
 ![image](https://user-images.githubusercontent.com/19226157/147628868-4b2ed167-ffbc-4b2e-9777-def1c3a5e137.png)
 
@@ -206,10 +210,6 @@ terraform apply -auto-approve -destroy
 Change the display name to "Terraform destroy"
 
 In advanced section of pipeline task, set up the working directory to rg sub-folder in tfcode folder in repository.
-
-- In the last step, click on pipeline tab and add the artifacts for the pipeline. Choose Azure DevOps Repository as artifact and provide repository name and branch name.
-
-![image](https://user-images.githubusercontent.com/19226157/147643159-eff18ef3-e43a-4951-8099-a6b88ce3261b.png)
 
 - Now the pipeline is completed and ready to be deployed. Click on create release to deploy the pipeline. Add the release description and click on create to create the release.
   
