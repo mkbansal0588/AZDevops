@@ -14,6 +14,7 @@ provider "azurerm" {
 
 locals {
 enable_locks = var.enable_locks ? var.index : 0
+default_tags = {}
 }
 
 resource "azurerm_resource_group" "rg" {
