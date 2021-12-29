@@ -23,7 +23,7 @@ In this module, you'll learn how to get started with Terraform very quickly in t
 | 1 | [Terraform Installation](#1-terraform-installation) | Local Administrator |
 | 2 | [Azure CLI](#2-azure-cli) | Local Administrator |
 | 3 | [Terraform Provider](#3-terraform-provider) | NA |
-| 4 | [HashiCorp Language (HCL)](#4-hashicorp-language-(hcl)) | NA |
+| 4 | [HashiCorp Language](#4-hashicorp-language) | NA |
 | 5 | [Terraform Commands](#5-terraform-commands) | NA |
 
 
@@ -96,7 +96,7 @@ provider "azurerm" {
 ```
 You can also add this code to main.tf file as well if you don't wishes to create a separate file.
 
-## 4. HashiCorp Language (HCL)
+## 4. HashiCorp Language
 
 HashiCorp Language (HCL) is similar to YAML and is a declarative style with blocks, identifiers, data sources, output, variables, and can provide functionality for mapping values into the blocks.
 
