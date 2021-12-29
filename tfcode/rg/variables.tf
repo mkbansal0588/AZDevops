@@ -61,6 +61,6 @@ variable "counter" {
 
 variable "enable_locks" {
   type = bool
-  default = true
+  default = false
   description = "Apply RG locks if set to true"
 }
