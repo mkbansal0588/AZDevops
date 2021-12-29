@@ -8,7 +8,7 @@ variable "location_accronym"{
 }
 
 variable "team_name" {
-  default = "faa"
+  default = "devops"
   description = "team name - usually refers to line of business "
    validation {
     condition = length(var.team_name) < 5
