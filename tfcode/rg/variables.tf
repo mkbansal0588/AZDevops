@@ -9,48 +9,48 @@ variable "location_accronym"{
 
 variable "team_name" {
   default = "faa"
-  description = "Nom "
+  description = "team name - usually refers to line of business "
    validation {
     condition = length(var.team_name) < 5
-    error_message = "Le nom du team doit contenir au plus 4 caractères."
+    error_message = "Shouldn't be more than 4 characters"
   }
 }
 
 variable "client_name" {
   type        = string
-  description = "Nom principal de la ressource sans les prefixes ni sufixes."
-  default     = "dgag"
+  description = "client name"
+  default     = "bcmp"
 }
 
 variable "index" {
   default = 1  
-  description = "Quand on a besoin de creer une sequence de rg on utilise ce variable pour ajouter la sequence à la fin"
+  description = "Resource index - helpful when creating multiple resources with same name at once."
 }
 
 variable "location" {
   type        = string
   default     = "canadacentral"
-  description = "La region ou le resource groupe doit etre cree"
+  description = "Azure Region location to use for deploying resources"
   validation {
     condition = var.location == "canadacentral" || var.location == "canadaeast"
-    error_message = "Les seules locations valides sont canadacentral et canadaeast."  
+    error_message = "Invalida Azure Region provided."  
   }
 }
 
 variable "environment" {
   type        = string  
-  description = "L'environnment "
+  description = "Environment Abbreviation"
   default     = "de"
   validation {
     condition = var.environment == "de" || var.environment == "pp" || var.environment == "pr"
-    error_message = "Lenvironnement doivent etre choisi parmi les options  de, pp et pr."
+    error_message = "Environment Abbreviation"
   }
 }
 
 variable "extra_tags" {
   type = map
   default = null
-  description = "Les TAGS que doit faire partie des tags du resource."
+  description = "Tags to apply on resource"
 }
 
 variable "counter" {
