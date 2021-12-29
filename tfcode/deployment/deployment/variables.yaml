@@ -1,0 +1,21 @@
+variables:
+  de_backendServiceArm: example-app-service-connection
+  de_keyvault: exampleapp12292021
+  de_env: de
+  de_backendAzureRmResourceGroupName: example-app
+  de_backendAzureRmStorageAccountName: exampleapp12292021
+  de_backendAzureRmContainerName: statefiles
+
+  pp_backendServiceArm: example-app-service-connection
+  pp_backendAzureRmResourceGroupName: example-app
+  pp_backendAzureRmStorageAccountName: exampleapp12292021
+  pp_backendAzureRmContainerName: statefiles
+  pp_keyvault: exampleapp12292021
+  pp_env: pp
+
+  pr_backendServiceArm: example-app-service-connection
+  pr_backendAzureRmResourceGroupName: example-app
+  pr_backendAzureRmStorageAccountName: exampleapp12292021
+  pr_backendAzureRmContainerName: statefiles
+  pr_keyvault: exampleapp12292021
+  pr_env: pr

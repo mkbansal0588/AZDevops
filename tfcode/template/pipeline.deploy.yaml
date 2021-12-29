@@ -105,7 +105,7 @@ jobs:
               export AZURE_CLIENT_SECRET=$(clientsecret)
               export AZURE_TENANT_ID=$(tenantid)
               export ARM_SUBSCRIPTION_ID=$(subscriptionid)
-              terraform -chdir="${{ parameters.workingDirectory }}" plan -var-file="$(Agent.BuildDirectory)/${{ parameters.deploymentFolder }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan      
+              terraform -chdir="${{ parameters.workingDirectory }}" plan -var-file="$(Agent.BuildDirectory)/repo/tfcode/${{ parameters.deploymentFolder }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan      
             displayName: Terraform Plan
 
           - script: |
@@ -117,5 +117,5 @@ jobs:
               export AZURE_CLIENT_SECRET=$(clientsecret)
               export AZURE_TENANT_ID=$(tenantid)
               export ARM_SUBSCRIPTION_ID=$(subscriptionid)
-              terraform -chdir="${{ parameters.workingDirectory }}" apply -auto-approve -var-file="$(Agent.BuildDirectory)/${{ parameters.deploymentFolder }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+              terraform -chdir="${{ parameters.workingDirectory }}" apply -auto-approve -var-file="$(Agent.BuildDirectory)/repo/tfcode/${{ parameters.deploymentFolder }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
             displayName: Terraform Apply

@@ -1,0 +1,13 @@
+team_name = "ops"
+client_name = "bcmp"
+index = 1
+counter = 1
+location = "canadacentral"
+environment = "de"
+extra_tags = {}
+resource_group_name = "rg-ops-bcmp-de-cacn-001"
+enabled_for_disk_encryption = false
+soft_delete_retention_days = 30
+purge_protection_enabled = true
+enable_rbac_authorization = false
+sku_name ="standard"

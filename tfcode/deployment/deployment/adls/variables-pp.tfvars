@@ -1,0 +1,16 @@
+team_name = "ops"
+client_name = "bcmp"
+index = 1
+counter = 4
+location = "canadacentral"
+environment = "de"
+extra_tags = {}
+account_name = ["bronze", "silve", "gold", "platinum"]
+is_hns_enabled = true
+enable_https_traffic_only = true
+allow_blob_public_access = true
+min_tls_version = "TLS1_2"
+resource_group_name = "rg-ops-bcmp-de-cacn-001"
+account_kind = "StorageV2"
+account_tier = "Standard"
+account_replication_type = "LRS"
