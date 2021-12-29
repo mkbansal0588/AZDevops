@@ -18,13 +18,23 @@ In this module, you will learn about deploying terraform deployment at scale.
 * Create terraform deployment templates.
 * Create environment specific variables files for azure resource deployment.
 * Create environment agnostic pipeline that make use of pipelines and variables to deploy services in multiple environments.
+* Deploy Storage account, key vault and factory contained in a resource group.
 
 ##  :bookmark_tabs: Table of Contents
 
 | #  | Section | Role |
 | --- | --- | --- |
-| 1 | [](#1-signup-for-an-azure-devops-account) | Azure Administrator |
-| 2 | [Create organization or project collection](#2-create-organization-or-project-collection) | Azure Administrator |
-| 3 | [Manage your project](#3-manage-your-project) | Azure Administrator |
-| 4 | [Azure Repos](#4-azure-repos) | Azure Administrator |
-| 5 | [Release Flow](#5-Release-Flow) | Azure Administrator |
+| 1 | [Terraform Code Review for Data Factory](#1-terraform-code-review-for-data-factory) | Azure Administrator |
+| 2 | [Terraform deployment template pipeline review](#2-terraform-deployment-template-pipeline-review) | Azure Administrator |
+| 3 | [Deployment variables files review](#3-deployment-variables-files-review) | Azure Administrator |
+| 4 | [Deployment pipeline review](#4-deployment-pipeline-review) | Azure Administrator |
+
+## 📚 Additional Reading
+
+## 🧑‍💼 To-Do Activities
+
+- Exercise 1: This pipeline generates the terraform plan and then applies in a single step however, in an ideal scenario, we would like to review the plan and wait for explicit approval before this plan is applied. Repurpose this pipeline to implement the desired solution. (Hint - Make use of pipeline environments)
+
+## :tada: Summary
+
+This module provided an overview of how to create a legacy and yaml based Azure devops pipelines.
