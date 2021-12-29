@@ -14,10 +14,7 @@ provider "azurerm" {
 
 locals {
 create_data_factory_git_vsts_set   = var.data_factory_vsts_account_name == "" ? toset([]) : toset(["_"])
-isUsingSharedIR = var.isUsingSharedIR == true ? toset(["_"]) : toset([])
-index = var.enableShir ? var.index : 0
-mngdtir = var.enableMngdtir ? 1 : 0
-adfmpep = var.enableAdfmpep ? length(var.adfmpep_name) * var.index : 0
+default_tags = {}
 }
 
 data "azurerm_client_config" "current" {}
