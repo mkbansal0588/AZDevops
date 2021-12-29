@@ -14,13 +14,10 @@ In this module, you will learn about Azure DevOps platform.
 
 ## :dart: Objectives
 
-* Signup for an Azure DevOps account.
-* Create Organization or project collection.
-* Manage your project.
-* Repositories and Branches
-* Release Flow
-* Introduction to Azure Pipelines
-* Agent Pools
+* Getting Started with Azure DevOps.
+* Organization and Project management.
+* Release flow
+
 
 ##  :bookmark_tabs: Table of Contents
 
