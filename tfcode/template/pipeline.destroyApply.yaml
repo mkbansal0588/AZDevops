@@ -1,0 +1,400 @@
+parameters:
+  - name: moduleName
+    displayName: "Module Name to Build"
+    type: string
+    default: ""
+  - name: workingDirectory
+    displayName: "Working Directory"
+    type: string
+    default: ""
+  - name: backendServiceArm
+    displayName: "Service Connection to use for backend."
+    type: string
+    default: ""
+  - name: backendAzureRmResourceGroupName
+    displayName: "Resource Group for Backend storage account"
+    type: string
+    default: ""
+  - name: backendAzureRmStorageAccountName
+    displayName: "Backend storage account"
+    type: string
+    default: ""
+  - name: backendAzureRmContainerName
+    displayName: "Container name to store terraform state file"
+    type: string
+    default: ""
+  - name: backendAzureRmKey
+    displayName: "State File Name"
+    type: string
+    default: ""
+  - name: keyvault
+    displayName: "Name of keyvault to pull the secrets and client id to be used for making connection to Azure for backend storage"
+    type: string
+    default: ""
+  - name: dependsOn
+    displayName: "Define Dependency"
+    type: string
+    default: ""
+  - name: condition
+    displayName: "Condition to run a job"
+    type: string
+    default: ""
+  - name: poolName
+    displayName: "Name of the agent pool to run the job"
+    type: string
+    default: "pool-faa-de-cacn"
+  - name: env
+    displayName: "Environment up for deployment"
+    type: string
+    default: ""
+  - name: moduleRepo
+    displayName: "Repository to download the terraform code."
+    type: string
+    default: ""
+  - name: currentRepo
+    displayName: "Repository to use to trigger the deployment."
+    type: string
+    default: ""
+  - name: projectName
+    displayName: "Azure DevOps project Name."
+    type: string
+    default: ""
+  - name: localFileName
+    displayName: "Local file name with extension(most likely .tf)."
+    type: string
+    default: "locals.tf"
+  - name: terraformVersion
+    displayName: "Terraform version to use for the deployment."
+    type: string
+    default: "0.15.3"
+  - name: pipelineName
+    displayName: "Pipeline name in the deployment."
+    type: string
+    default: ""
+  - name: vmImage
+    displayName: "VmImage to use. Only applicable in case of microsoft hosted agent pool"
+    type: string
+    default: "vs2017-win2016"
+    #default: "ubuntu-18.04"
+  - name: repos
+    displayName: "repos to download"
+    type: object
+  - name: copyRepos
+    displayName: "repos to copy local files to"
+    type: object
+  - name: secrets
+    displayName: "secrets to download"
+    type: string
+    default: "tenantid,subscriptionid,clientsecret,clientid,sqlserver"
+  - name: additionalTerraformVariables
+    displayName: "Additional terraform runtime variables to set"
+    type: string
+    default: ""
+  - name: mdname
+    displayName: "Name of the module"
+    type: string
+    
+
+jobs:
+  - deployment: 
+    displayName: 'Destroying Module ${{ parameters.mdname }}'
+    ${{ if eq(parameters.poolName, '') }}:
+      pool: 
+        vmImage: ${{ parameters.vmImage }}
+    ${{ if ne(parameters.poolName, '') }}:
+      pool: ${{ parameters.poolName }}
+    dependsOn: '${{ parameters.dependsOn }}'
+    condition: '${{ parameters.condition }}'
+    environment: Development
+    workspace:
+      clean: all
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - ${{ each repo in parameters.repos }}:
+              - checkout: ${{ repo }}
+                path: ${{ repo }}   
+                
+          - task: AzureKeyVault@1
+            inputs:
+              azureSubscription: '${{ parameters.backendServiceArm }}'
+              KeyVaultName: '${{ parameters.keyvault }}'
+              SecretsFilter: '${{ parameters.secrets }}'
+              runAsPreJob: true
+            displayName: 'Get key vault secrets as pipeline variables'
+
+          - ${{ each copyRepo in parameters.copyRepos }}:
+              - task: CopyFiles@2
+                inputs:
+                  SourceFolder: '$(Agent.BuildDirectory)/faa-tf-common-files'
+                  Contents: '${{ parameters.localFileName }}'
+                  TargetFolder: '$(Agent.BuildDirectory)/${{ copyRepo }}/' 
+          
+          - script: |
+              terraform -chdir="${{ parameters.workingDirectory }}" init \
+                -plugin-dir="../faa-tf-common-files/plugins" \
+                -reconfigure \
+                -backend-config="storage_account_name=${{ parameters.backendAzureRmStorageAccountName }}" \
+                -backend-config="container_name=${{ parameters.backendAzureRmContainerName }}" \
+                -backend-config="key=${{ parameters.backendAzureRmKey }}" \
+                -backend-config="resource_group_name=${{ parameters.backendAzureRmResourceGroupName }}" \
+                -backend-config="subscription_id=$(subscriptionid)" \
+                -backend-config="tenant_id=$(tenantid)" \
+                -backend-config="client_id=$(clientid)" \
+                -backend-config="client_secret=$(clientsecret)"
+            displayName: Terraform Init
+
+          - script: |
+              chmod -R +x ../faa-tf-common-files/plugins/
+
+              if [[ "${{ parameters.moduleName }}" == */* ]]
+              then
+                tempmodule=${{ parameters.moduleName }}
+                module=`echo ${{ parameters.moduleName }} | cut -f2 -d'/' | tr '[:upper:]' '[:lower:]'`
+              else
+                module=`echo ${{ parameters.moduleName }} | tr '[:upper:]' '[:lower:]'`
+              fi
+              
+              echo "Printing Module name"
+              echo $module
+
+              ### If statement to accomodate AKS deployment ###
+              if [[ -z $(servicepartageinfraclientid) ]]  
+              then
+                if [[ $module != 'aks' ]]
+                then
+                  az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+                  export ARM_CLIENT_ID=$(clientid)
+                  export ARM_CLIENT_SECRET=$(clientsecret)
+                  export ARM_TENANT_ID=$(tenantid)
+                  export AZURE_CLIENT_ID=$(clientid)
+                  export AZURE_CLIENT_SECRET=$(clientsecret)
+                  export AZURE_TENANT_ID=$(tenantid)
+                  export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+                else
+                  echo "Something doesn't look correct. Module name is AKS but servicepartageinfraclientid is missing. Did you forgot to pull it from KeyVault?"
+                  exit 1
+                fi
+              else
+                if [[ $module != 'aks' ]]
+                then
+                  az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+                  export ARM_CLIENT_ID=$(clientid)
+                  export ARM_CLIENT_SECRET=$(clientsecret)
+                  export ARM_TENANT_ID=$(tenantid)
+                  export AZURE_CLIENT_ID=$(clientid)
+                  export AZURE_CLIENT_SECRET=$(clientsecret)
+                  export AZURE_TENANT_ID=$(tenantid)
+                  export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+                else
+                  az login --service-principal -u $(servicepartageinfraclientid) -p $(servicepartageinfraclientsecret) --tenant $(tenantid)
+                  export ARM_CLIENT_ID=$(servicepartageinfraclientid)
+                  export ARM_CLIENT_SECRET=$(servicepartageinfraclientsecret)
+                  export ARM_TENANT_ID=$(tenantid)
+                  export AZURE_CLIENT_ID=$(servicepartageinfraclientid)
+                  export AZURE_CLIENT_SECRET=$(servicepartageinfraclientsecret)
+                  export AZURE_TENANT_ID=$(tenantid)
+                  export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+                  export TF_VAR_servicepartageinfra_client_secret=$(servicepartageinfraclientsecret)
+                  export TF_VAR_aks_client_secret=$(clientsecret)
+                  export TF_VAR_devops_client_secret=$(clientsecret)
+                  export JQ_RELATIVE_PATH="/usr/bin/jq"
+                fi
+              fi  
+
+              #az account set --subscription="432db9fe-41c3-43ce-a978-72ec4735c474"
+              if [[ ! -z "${{ parameters.additionalTerraformVariables }}" ]]
+              then
+                if [[ $module == 'aks' || $module == 'azuredevops' || $module == 'vm' ||  $module == 'adf' ]]
+                then
+                  if [[ -z "${{ parameters.pipelineName }}" ]]
+                  then 
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy ${{ parameters.additionalTerraformVariables }} -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy ${{ parameters.additionalTerraformVariables }} -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    fi
+                  else
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy ${{ parameters.additionalTerraformVariables }} -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy ${{ parameters.additionalTerraformVariables }} -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    fi
+                  fi
+                else
+                  if [[ -z "${{ parameters.pipelineName }}" ]]
+                  then 
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    fi
+                  else
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    fi
+                  fi
+                fi
+              else
+                if [[ $module == 'aks' || $module == 'azuredevops' || $module == 'vm' ||  $module == 'adf' ]]
+                then
+                  echo "Something doesn't look correct. Module name is either aks or azureDevops but still additionalTerraformVariables not variable is set"
+                else
+                  if [[ -z "${{ parameters.pipelineName }}" ]]
+                  then 
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    fi
+                  else
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" plan -destroy -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars" -out $(Build.BuildId).plan
+                    fi
+                  fi  
+                fi
+              fi 
+            displayName: Terraform Destroy Plan
+
+          - script: |
+              chmod -R +x ../faa-tf-common-files/plugins/
+
+              if [[ "${{ parameters.moduleName }}" == */* ]]
+              then
+                tempmodule=${{ parameters.moduleName }}
+                module=`echo ${{ parameters.moduleName }} | cut -f2 -d'/' | tr '[:upper:]' '[:lower:]'`
+              else
+                module=`echo ${{ parameters.moduleName }} | tr '[:upper:]' '[:lower:]'`
+              fi
+              
+              echo "Printing Module name"
+              echo $module
+
+              ### If statement to accomodate AKS deployment ###
+              if [[ -z $(servicepartageinfraclientid) ]]  
+              then
+                if [[ $module != 'aks' ]]
+                then
+                  az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+                  export ARM_CLIENT_ID=$(clientid)
+                  export ARM_CLIENT_SECRET=$(clientsecret)
+                  export ARM_TENANT_ID=$(tenantid)
+                  export AZURE_CLIENT_ID=$(clientid)
+                  export AZURE_CLIENT_SECRET=$(clientsecret)
+                  export AZURE_TENANT_ID=$(tenantid)
+                  export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+                else
+                  echo "Something doesn't look correct. Module name is AKS but servicepartageinfraclientid is missing. Did you forgot to pull it from KeyVault?"
+                  exit 1
+                fi
+              else
+                if [[ $module != 'aks' ]]
+                then
+                  az login --service-principal -u $(clientid) -p $(clientsecret) --tenant $(tenantid)
+                  export ARM_CLIENT_ID=$(clientid)
+                  export ARM_CLIENT_SECRET=$(clientsecret)
+                  export ARM_TENANT_ID=$(tenantid)
+                  export AZURE_CLIENT_ID=$(clientid)
+                  export AZURE_CLIENT_SECRET=$(clientsecret)
+                  export AZURE_TENANT_ID=$(tenantid)
+                  export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+                else
+                  az login --service-principal -u $(servicepartageinfraclientid) -p $(servicepartageinfraclientsecret) --tenant $(tenantid)
+                  export ARM_CLIENT_ID=$(servicepartageinfraclientid)
+                  export ARM_CLIENT_SECRET=$(servicepartageinfraclientsecret)
+                  export ARM_TENANT_ID=$(tenantid)
+                  export AZURE_CLIENT_ID=$(servicepartageinfraclientid)
+                  export AZURE_CLIENT_SECRET=$(servicepartageinfraclientsecret)
+                  export AZURE_TENANT_ID=$(tenantid)
+                  export ARM_SUBSCRIPTION_ID=$(subscriptionid)
+                  export TF_VAR_servicepartageinfra_client_secret=$(servicepartageinfraclientsecret)
+                  export TF_VAR_aks_client_secret=$(clientsecret)
+                  export TF_VAR_devops_client_secret=$(clientsecret)
+                  export JQ_RELATIVE_PATH="/usr/bin/jq"
+                fi
+              fi  
+
+              #az account set --subscription="432db9fe-41c3-43ce-a978-72ec4735c474"
+              if [[ ! -z "${{ parameters.additionalTerraformVariables }}" ]]
+              then
+                if [[ $module == 'aks' || $module == 'azuredevops' || $module == 'vm' ||  $module == 'adf' ]]
+                then
+                  if [[ -z "${{ parameters.pipelineName }}" ]]
+                  then 
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve ${{ parameters.additionalTerraformVariables }} -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/variables-${{ parameters.env }}.tfvars"
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve ${{ parameters.additionalTerraformVariables }} -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars"
+                    fi
+                  else
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve ${{ parameters.additionalTerraformVariables }} -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/variables-${{ parameters.env }}.tfvars"
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve ${{ parameters.additionalTerraformVariables }} -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars"
+                    fi
+                  fi
+                else
+                  if [[ -z "${{ parameters.pipelineName }}" ]]
+                  then 
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/variables-${{ parameters.env }}.tfvars"
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars"
+                    fi
+                  else
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/variables-${{ parameters.env }}.tfvars"
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars"
+                    fi
+                  fi
+                fi
+              else
+                if [[ $module == 'aks' || $module == 'azuredevops' || $module == 'vm' ||  $module == 'adf' ]]
+                then
+                  echo "Something doesn't look correct. Module name is either aks or azureDevops but still additionalTerraformVariables not variable is set"
+                else
+                  if [[ -z "${{ parameters.pipelineName }}" ]]
+                  then 
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/variables-${{ parameters.env }}.tfvars"
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars"
+                    fi
+                  else
+                    if [[ -z "${{ parameters.moduleName }}" ]]
+                    then
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/variables-${{ parameters.env }}.tfvars"
+                    else
+                      terraform -chdir="${{ parameters.workingDirectory }}" destroy -auto-approve -var-file="$(Agent.BuildDirectory)/${{ parameters.currentRepo }}/${{ parameters.pipelineName }}/${{ parameters.moduleName }}/variables-${{ parameters.env }}.tfvars"
+                    fi
+                  fi  
+                fi
+              fi
+            displayName: Terraform Destroy
+
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                cat $moduleRepo/.terraform/terraform.tfstate
+                rm $moduleRepo/.terraform/terraform.tfstate
+              workingDirectory: '$(Agent.BuildDirectory)'
+            env:
+              moduleRepo: ${{ parameters.moduleRepo }}

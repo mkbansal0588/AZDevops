@@ -1,0 +1,42 @@
+{
+  "spark_conf.spark.databricks.cluster.profile": {
+    "type": "fixed",
+    "value": "singleNode",
+    "hidden": false
+  },
+  "cluster_name": {
+    "type": "unlimited",
+    "defaultValue": "login_DataEngineer_SingleNodepolicy"
+  },
+  "instance_pool_id": {
+    "type": "unlimited",
+    "isOptional": false
+  },
+  "spark_version": {
+    "type": "regex",
+    "pattern": "6\\.[4]+\\.x-scala.*|7\\.[0-9]+\\.x-scala.*|8\\.[0-9]+\\.x-scala.*"
+  },
+  "enable_local_disk_encryption": {
+    "type": "fixed",
+    "hidden": true,
+    "value": true
+  },
+  "autotermination_minutes": {
+    "type": "range",
+    "minValue": 15,
+    "maxValue": 120,
+    "defaultValue": 30
+  },
+  "spark_conf.spark.databricks.delta.preview.enabled": {
+    "type": "fixed",
+    "value": "true"
+  },
+  "custom_tags.team": {
+    "type": "unlimited",
+    "isOptional": false
+  },
+  "custom_tags.cost_center": {
+    "type": "unlimited",
+    "isOptional": false
+  }
+}
