@@ -210,6 +210,14 @@ You will need to fetch the branch before you can see it and swap to it in your l
 
 ## 5. Release Flow
 
+For teams with more than one engineer, where engineers includes both developers and operations, we need to consider how we are going to allow them to collaborate on code and track changes, one of the early decisions for the team is therefore what branching methodology to use. This is particularly relevant since we should also be including Infrastructure-as-Code in our source control and will allows us to back track to see what changes were made and when to help with issue resolution.
+
+Release Flow is a trunk-based development approach that utilizes branches off the master trunk for specific topics as opposed to other trunk-based developments that continuously deploy to the trunk. 
+
+![image](https://user-images.githubusercontent.com/19226157/147617295-30128d0b-3f1b-4d79-8eab-48f086115cec.png)
+
+
+![image](https://user-images.githubusercontent.com/19226157/147617177-249a576a-31ee-4d9e-9507-3f3af3cceb54.png)
 
 
 ## 6. Introduction to Azure Pipelines
