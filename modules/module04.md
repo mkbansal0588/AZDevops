@@ -1,6 +1,6 @@
 # Module 04 - Terraform deployment at scale
 
-[< Previous Module](../modules/module03.md) - **[Home](../README.md)**
+[< Previous Module](../modules/module03.md) - **[Home](../README.md)** - [Next Module >](../modules/module05.md)
 
 ## :thinking: Prerequisites
 
