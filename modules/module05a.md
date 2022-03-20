@@ -1,4 +1,4 @@
-# Module 05a - CI/CD with Data Factory - Pipeline Deployment
+# Module 05a - CI/CD with Data Factory - ETL Pipeline Development
 
 [< Previous Module](../modules/module05.md) - **[Home](../README.md)** - [Next Module >](../modules/module05b.md)
 
