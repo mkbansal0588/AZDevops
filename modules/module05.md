@@ -31,6 +31,7 @@ In this module, you will learn about CI/CD process with Data Factory
 | 4 | [Azure Data Factories](#4-azure-data-factories) | Azure Administrator |
 | 5 | [Storage Accounts](#5-storage-accounts) | Azure Administrator |
 | 6 | [Create Dedicated Repository for Data Factory](#6-create-dedicated-repository-for-data-factory) | Azure Administrator |
+| 7 | [Configure Data Factory Integration with Azure DevOps](#7-configure-data-factory-integration-with-azure-devops) | Azure Administrator |
 
 ## 1. Objective
 
@@ -255,10 +256,10 @@ Result of upload should look like this -
 ![image](https://user-images.githubusercontent.com/19226157/159146370-fe1a4156-ed94-4685-8bab-67dcfa9c3e77.png)
 
 
-### 5.4 Creating UAT and PROD Storage Accounts
+### 5.4 Setting up UAT and Prod Storage Accounts
 
-Now that we have created our first storage account, follow the same steps ([5.1](#5.1-creating-the-dev-storage-account),[5.2](#5.2-add-containers-in-storage-account)) to create the UAT and PROD storage accounts in their corresponding Resource Group:
-
+Now that we have created our first storage account, follow the same steps ( **[5.1](#5.1-creating-the-dev-storage-account), [5.2](#5.2-add-containers-in-storage-account) and [5.3](#5.3-upload-some-csv-files)** ) to setup the UAT and PROD storage accounts in their corresponding Resource Group:
+ 
 ```
 “<Initials>warehouseuatsa”
 
@@ -342,7 +343,20 @@ We have now created an organization in DevOps as well as a project that will con
 
 If this is your first time using Azure DevOps, take the next few minutes to explore the options within the project. Our focus will be on the “Repos” and “Pipelines” services visible in the left menu.
 
-## 7. Configure Data Factory Connectivity to Azure DevOps	 
+### 6.3 Creating Your Repository
+
+Click on **Repos** icon from menu and choose **+ New Repository** from repository drop down menu.
+
+![image](https://user-images.githubusercontent.com/19226157/159146656-97597fa7-453f-4e28-81d7-049b4eb075ae.png)
+
+Give Repository an appropriate **name** - for example - **ci-cd-datafactory**, and click on **Create** to create the new repository.
+
+Result should look something like this -
+
+![image](https://user-images.githubusercontent.com/19226157/159146675-fc72add7-307b-4900-bc41-d375015eccbd.png)
+
+ 
+## 7. Configure Data Factory Integration with Azure DevOps	 
 
 ### 7.1 Link Dev Data Factory to DevOps Repo
 
@@ -392,4 +406,7 @@ On the left-hand side click on the pencil “**Author**”. If you get prompted 
 
 ## :tada: Summary
 
-This module provided an overview of how to do terraform deployment at scale.
+This module provided helped you with necessary set up to enable to do CI / CD with data factory.
+
+
+**[Next Module >](../modules/module05a.md)**
