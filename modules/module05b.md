@@ -1,4 +1,4 @@
-# Module 05a - CI/CD with Data Factory - DevOps Pipeline for CI and CD.
+# Module 05a - CI/CD with Data Factory - DevOps Pipeline For Automating Data Factory Artifacts Deployment
 
 [< Previous Module](../modules/module05a.md) - **[Home](../README.md)** - [Next Module >](../modules/module06.md)
 
@@ -178,6 +178,8 @@ stages:
 ## 🧑‍💼 To-Do Activities
 
 - Exercise 1: Complete the exercise mentioned in [Module 05](../modules/module05.md) and deploy the changes to UAT and PROD data factory using automation pipeline
+- Exercise 2: Convert this YAML pipeline into generic template for deployment.
+	- Hint: Make use of variables.
 
 ## :tada: Summary
 
