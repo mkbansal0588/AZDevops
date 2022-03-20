@@ -108,12 +108,14 @@ Head over to **Azure DevOps portal** to view the generated ARM templates. Click 
 
 ## 3. DevOps Pipeline
 
+Here is the template pipeline for CI and CD of the ARM template generated post pipeline development. Fill out variable highlighted in **<>**
+
 ```
 resources:
  repositories:
    - repository: **<devops_repository_name>**
      name: **<devops_project_name>/<devops_repository_name>**
-     ref: '**refs/heads/adf_publish**'
+     ref: 'refs/heads/adf_publish'
      type: git
 
 stages:
