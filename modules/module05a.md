@@ -211,56 +211,6 @@ Alternatively, you can also check the destinationdata container in storage accou
 ![image](https://user-images.githubusercontent.com/19226157/159132343-28361cde-af0b-4018-9b77-101a391873dc.png)
  
 
-## 5. Generate and Publish Pipeline templates
-
-Now that all kind of validation are successful, time to **merge** this code to master branch. To do that, Click on **Manage** icon and expand the branch option on top left hand side corner. Click on **Create Pull Request**.
-
-![image](https://user-images.githubusercontent.com/19226157/159132370-0da4bcfa-fc33-4ced-abe3-83ca3adb98d6.png)
-
-
-This should open a pull request form in Azure Devops in new window. Fill out the basic details such as **Title** and **Description**, and then click on **Create** to create the pull request.
-
-![image](https://user-images.githubusercontent.com/19226157/159132414-76b3c93a-de2b-4eea-aa78-f7017b1c13ca.png)
-
-![image](https://user-images.githubusercontent.com/19226157/159132421-b6ce684f-e0a1-46e4-bbcc-8edf9fcaa712.png)
-
-After the request is created, click on **Complete** to finish merging the code to master. When prompted with additional optional, leave them as default and click on **Complete Merge**.
-
-![image](https://user-images.githubusercontent.com/19226157/159132445-4d80cd8f-85d5-4e40-bd4a-f5b7616df7fa.png)
-
-![image](https://user-images.githubusercontent.com/19226157/159132450-9034aa77-7853-496a-8c7e-54cd262330ab.png)
-
-It shouldn’t take too long to complete the merge.
-
-![image](https://user-images.githubusercontent.com/19226157/159132461-d844b0ea-bd33-4147-9a95-1742f2c0f00e.png)
-
-```
-To propagate the data factory pipelines from one environment (dev) to another (pre-prod and prod), these pipelines including linked services and datasets needs to be converted into ARM template. Data factory has this feature inbuilt. 
-```
-
-Head over to **data factory** and click on **Manage** Icon and switch to **main/master** branch.
-
-![image](https://user-images.githubusercontent.com/19226157/159132481-11e2fa53-6234-4c57-8a75-6cf64c317365.png)
-
-Click on **Publish**, to publish the changes and generate ARM template.
-
-![image](https://user-images.githubusercontent.com/19226157/159132493-0487878d-7fa6-4855-a1f8-ff0230c64b16.png)
-
-Before data factory publish the changes, it generates a report of pending changes. Click **OK** after review.
-
-![image](https://user-images.githubusercontent.com/19226157/159132503-e5c1d5d1-b99a-4676-9d82-62485ef72bb3.png)
-
-![image](https://user-images.githubusercontent.com/19226157/159132507-b050d64f-8695-4348-b898-f53eafa8d22b.png)
-
-
-Head over to **Azure DevOps portal** to view the generated ARM templates. Click on **adf_publish** branch.
-
-![image](https://user-images.githubusercontent.com/19226157/159132520-7049b901-8281-4f60-8c32-cfc34bad9aed.png)
-
-![image](https://user-images.githubusercontent.com/19226157/159132527-77cd3c03-877f-4aa2-adc5-5f1be0ddffaa.png)
-
-
-
 ## 📚 Additional Reading
 
 <ul>
