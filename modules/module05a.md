@@ -33,11 +33,32 @@ In this module, you will learn about creation Data Factory Pipeline.
 
 ## 1. Integration Runtime
 
-Objective of this module to build a data copy pipeline in Development data factory; and move this pipeline to other data factory designated as production data factory.
+An Integration Runtime (IR) is the compute infrastructure used by Azure Data Factory to provide data integration capabilities such as Data Flows and Data Movement. It has access to resources in either public networks, or hybrid scenarios (public and private networks).
 
-The diagram below is a simple example of an Azure Data Factory pipeline. In this example, we want to move a single CSV file from blob storage into anotehr storage account. This activity is done through an Azure Data Factory (ADF) pipeline. ADF pipelines consist of several parts and typically consist of linked services, datasets, and activities.
+Integration Runtimes are specified in each Linked Service, under Connections.
 
-![image](https://user-images.githubusercontent.com/19226157/159130336-e6dcd37c-9b4a-47b1-aa22-1eabc6ec7ddd.png)
+![image](https://user-images.githubusercontent.com/19226157/159144541-4d4feeb8-90ef-47a5-b88f-484692e56fbd.png)
+
+There are 3 types to choose from.
+
+![image](https://user-images.githubusercontent.com/19226157/159144550-101f3111-ea90-4a6b-bf76-58af3893f462.png)
+
+**Azure Integration Runtime** is managed by Microsoft. All the patching, scaling and maintenance of the underlying infrastructure is taken care of. The IR can only access data stores and services in public networks.
+
+**Self-hosted Integration Runtimes** use infrastructure and hardware managed by you. You’ll need to address all the patching, scaling and maintenance. The IR can access resources in both public and private networks.
+
+**Azure-SSIS Integration Runtimes** are VMs running the SSIS engine which allow you to natively execute SSIS packages. They are managed by Microsoft. As a result, all the patching, scaling and maintenance is taken care of. The IR can access resources in both public and private networks.
+
+### 1.1 Integration Runtime Scenarios
+
+![image](https://user-images.githubusercontent.com/19226157/159144568-bf9c03ed-1554-474f-b8fe-978995cc7142.png)
+
+<ul>
+  <li>Azure automatically provisions an integration Runtime which can connect to Azure resources (Azure SQL, Azure Synapse Analytics, Storage Accounts) without any issues.</li>
+  <li>You can perform data integration securely in a private network environment, shielded from the public cloud environment. For that you need to install a self-hosted IR inside your virtual private network. The self-hosted integration runtime only makes outbound HTTP-based connections to open internet.</li>
+  <li>You can also perform data integration securely in an on prem environment. For that you need to install a Self-hosted IR behind your corporate firewall in your on prem environment.</li>
+  <li>You can natively execute SSIS Packages by creating an Azure-SSIS Integration Runtime which creates an Integration Services Catalog in Azure SQL Database where the packages are stored. An ADF pipeline run sends commands to the Azure SSIS IR which executes the SSIS Packages.</li>
+</ul>
 
 ## 2 Linked Service
 
@@ -242,9 +263,14 @@ Head over to **Azure DevOps portal** to view the generated ARM templates. Click 
 
 ## 📚 Additional Reading
 
+<ul>
+	<li>https://docs.microsoft.com/en-us/azure/data-factory/data-factory-tutorials</li>
+</ul>
+
 ## 🧑‍💼 To-Do Activities
 
-- Exercise 1: Make changes to pre-production and production terraform module for some/all the modules and deploy two additional sets of resource groups.
+- Exercise 1: Add wrapper to this pipeline to run this pipeline in a loop
+   - Hint: Use "for-each" activity.
 
 ## :tada: Summary
 
