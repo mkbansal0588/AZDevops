@@ -402,7 +402,7 @@ On the left-hand side click on the pencil “**Author**”. If you get prompted 
 
 ## 🧑‍💼 To-Do Activities
 
-- Exercise 1: Make changes to pre-production and production terraform module for some/all the modules and deploy two additional sets of resource groups.
+- Exercise 1: Complete the environment set up in UAT and PRODUCTION environment.
 
 ## :tada: Summary
 
