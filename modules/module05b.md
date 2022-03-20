@@ -1,4 +1,4 @@
-# Module 05a - CI/CD with Data Factory - Pipeline Deployment
+# Module 05a - CI/CD with Data Factory - DevOps Pipeline for CI and CD.
 
 [< Previous Module](../modules/module05a.md) - **[Home](../README.md)** - [Next Module >](../modules/module06.md)
 
@@ -175,8 +175,7 @@ stages:
 
 ## 🧑‍💼 To-Do Activities
 
-- Exercise 1: Complete the exercise mentioned in Module05a and deploy the changes to UAT and PROD data factory using automation pipeline
-   - Hint: Use "for-each" activity.
+- Exercise 1: Complete the exercise mentioned in [Module 05](../modules/module05.md) and deploy the changes to UAT and PROD data factory using automation pipeline
 
 ## :tada: Summary
 
