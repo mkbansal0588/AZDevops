@@ -184,3 +184,5 @@ stages:
 ## :tada: Summary
 
 This module provided an overview of CI/CD with Data Factory.
+
+**[Next Module >](../modules/module06.md)**
