@@ -1,4 +1,4 @@
-# Module 05a - CI/CD with Data Factory - DevOps Pipeline For Automating Data Factory Artifacts Deployment
+# Module 05b - CI/CD with Data Factory - DevOps Pipeline For Automating Data Factory Artifacts Deployment
 
 [< Previous Module](../modules/module05a.md) - **[Home](../README.md)** - [Next Module >](../modules/module06.md)
 
