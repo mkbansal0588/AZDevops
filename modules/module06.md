@@ -1,4 +1,4 @@
-# Module 05 - CI/CD with Databricks - Environment setup
+# Module 06 - CI/CD with Databricks - Environment setup
 
 [< Previous Module](../modules/module05b.md) - **[Home](../README.md)** - [Next Module >](../modules/module06a.md)
 
